@@ -1,0 +1,30 @@
+{
+  "name": "ai-agentic-video-studio",
+  "version": "1.0.0",
+  "description": "A motion-graphics studio you run locally: give it a video, get back a transparent layer of cards, icons and transitions that sits over it — plus captions films, vertical reels and measured sound design.",
+  "type": "module",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "start": "node server.mjs",
+    "doctor": "node scripts/doctor.mjs",
+    "setup": "node scripts/build-sfx.mjs && node scripts/vendor.mjs",
+    "sfx": "node scripts/build-sfx.mjs",
+    "vendor": "node scripts/vendor.mjs",
+    "motion": "node scripts/motion.mjs",
+    "i18n": "node scripts/build-i18n.mjs",
+    "i18n:extract": "node scripts/extract-i18n.mjs",
+    "i18n:check": "node scripts/extract-i18n.mjs --coverage"
+  },
+  "keywords": [
+    "video",
+    "motion-graphics",
+    "hyperframes",
+    "ffmpeg",
+    "captions",
+    "persian",
+    "rtl"
+  ]
+}

@@ -1,0 +1,351 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#101111" />
+    <title>استودیوی ویدیو</title>
+    <link rel="stylesheet" href="assets/fonts/vazirmatn.css" />
+    <link rel="stylesheet" href="app.css" />
+  </head>
+  <body>
+    <header class="top">
+      <div class="brand">
+        <span class="mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M5 4.5h11a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-11a2 2 0 0 1 2-2Z" transform="translate(1 0)" />
+            <path d="m10 9 5 3-5 3Z" fill="currentColor" stroke="none" />
+          </svg>
+        </span>
+        <span class="txt">
+          <span class="name">استودیوی ویدیو</span>
+          <span class="sub">HyperFrames · قوانین خانه</span>
+        </span>
+      </div>
+      <div class="machine" id="machine">در حال خواندن وضعیت دستگاه…</div>
+      <button type="button" class="ghost" id="langBtn" title="زبان" data-no-i18n>English</button>
+      <button type="button" class="ghost" id="jobsBtn">مشاغل</button>
+    </header>
+
+    <!-- Hosted panel, no engine on this machine (ui/engine.js) -->
+    <section class="engine-off" id="engineOff" hidden aria-live="polite">
+      <h2>موتوری روی این دستگاه پیدا نشد</h2>
+      <p class="lede">
+        این صفحه فقط درخواست را می‌سازد؛ ویدیو را برنامه‌ای روی همین رایانه‌ات می‌سازد.
+        آن را روشن کن، به این صفحه اجازه بده و دوباره امتحان کن.
+      </p>
+      <pre data-no-i18n><code>cd ai-agentic-video-studio
+npm start -- --allow-origin pages</code></pre>
+      <p class="why">
+        بی‌اجازه موتور هیچ سایتی را جواب نمی‌دهد. فلگ بالا همان اجازه است و فقط به
+        سایت‌های گیت‌هاب پیجز می‌دهد؛ می‌توانی به‌جایش آدرس دقیق سایت خودت را بنویسی.
+      </p>
+      <div class="engine-row">
+        <label for="enginePort">پورت موتور</label>
+        <input type="number" id="enginePort" min="1" max="65535" value="8790" />
+        <button type="button" class="ghost" id="engineRetry">دوباره امتحان کن</button>
+        <span class="engine-state" id="engineState"></span>
+      </div>
+      <p class="tiny">
+        اگر مرورگرت تماس با رایانهٔ خودت را بست، همین صفحه را محلی باز کن:
+        <span dir="ltr">http://127.0.0.1:8790</span>
+      </p>
+    </section>
+
+    <main id="wizard">
+      <ol class="steps" id="steps">
+        <li data-step="1" class="active" role="button" tabindex="0" aria-current="step"><span>۱</span> منبع</li>
+        <li data-step="2" role="button" tabindex="0"><span>۲</span> خروجی</li>
+        <li data-step="3" role="button" tabindex="0"><span>۳</span> پس‌زمینه</li>
+        <li data-step="4" role="button" tabindex="0"><span>۴</span> جهت و تنظیمات</li>
+      </ol>
+      <div class="rail" aria-hidden="true"><i></i></div>
+
+      <section class="panels">
+        <!-- ۱. منبع --------------------------------------------------------- -->
+        <div class="panel" data-panel="1">
+          <h2>فایل اصلی را بده</h2>
+          <p class="lede">یکی از سه حالت، یا هر ترکیبی که داری. فایل‌ها کپی نمی‌شوند؛ استودیو فقط مسیرشان را می‌خواند.</p>
+          <div class="sources">
+            <article class="source" data-kind="video">
+              <h3>
+                <span class="ico" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2.5" y="5" width="19" height="14" rx="3" />
+                    <path d="M10 9.5 14.5 12 10 14.5Z" />
+                  </svg>
+                </span>
+                فایل ویدیو
+              </h3>
+              <p>تصویرِ خام که رویش کار می‌کنیم.</p>
+              <div class="slot" data-slot="video">
+                <button class="pick" type="button">انتخاب از دیسک</button>
+                <div class="drop" tabindex="0" role="button" aria-label="انتخاب یا رها کردن فایل">یا فایل را اینجا رها کن</div>
+              </div>
+            </article>
+            <article class="source" data-kind="audio">
+              <h3>
+                <span class="ico" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+                    <path d="M4 12v0M8 8.5v7M12 5.5v13M16 9v6M20 11.5v1" />
+                  </svg>
+                </span>
+                فایل صدا
+              </h3>
+              <p>بی کلام؟ پیاده‌سازی می‌کنیم و زیرنویس می‌سازیم.</p>
+              <div class="slot" data-slot="audio">
+                <button class="pick" type="button">انتخاب از دیسک</button>
+                <div class="drop" tabindex="0" role="button" aria-label="انتخاب یا رها کردن فایل">یا فایل را اینجا رها کن</div>
+              </div>
+            </article>
+            <article class="source" data-kind="srt">
+              <h3>
+                <span class="ico" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+                    <rect x="2.5" y="5" width="19" height="14" rx="3" />
+                    <path d="M7 13.5h5M15 13.5h2M7 10h3M12 10h5" />
+                  </svg>
+                </span>
+                فایل زیرنویس
+              </h3>
+              <p>اس‌آر‌تی فارسی؛ همان متن، همان زمان‌ها.</p>
+              <div class="slot" data-slot="srt">
+                <button class="pick" type="button">انتخاب از دیسک</button>
+                <div class="drop" tabindex="0" role="button" aria-label="انتخاب یا رها کردن فایل">یا فایل را اینجا رها کن</div>
+              </div>
+            </article>
+            <article class="source" data-kind="reference">
+              <h3>
+                <span class="ico" aria-hidden="true">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3.5c4.5 0 8 3.3 8 7.2 0 2.6-1.7 3.8-3.4 3.8h-1.4c-1 0-1.8.8-1.8 1.8 0 .6.3 1 .6 1.5.3.4.5.8.5 1.3 0 1.1-.9 1.9-2.5 1.9-4 0-7-3.6-7-8.2C5.5 6.8 8.4 3.5 12 3.5Z" />
+                    <circle cx="9.2" cy="9.5" r="1.1" fill="currentColor" stroke="none" />
+                    <circle cx="12.6" cy="7.8" r="1.1" fill="currentColor" stroke="none" />
+                    <circle cx="15.9" cy="9.9" r="1.1" fill="currentColor" stroke="none" />
+                  </svg>
+                </span>
+                ویدیوی رفرنس
+              </h3>
+              <p>یک ویدیو بده که دوست داری؛ استودیو می‌فهمد چطور ساخته شده — هر چند ثانیه یک کارت، چقدر جنب‌وجوش، کجای کادر — و شبیه همان موشن می‌زند. هیچ فریمی کپی نمی‌شود.</p>
+              <div class="slot" data-slot="reference">
+                <button class="pick" type="button">انتخاب از دیسک</button>
+                <div class="drop" tabindex="0" role="button" aria-label="انتخاب یا رها کردن فایل">یا فایل را اینجا رها کن</div>
+              </div>
+              <div class="style-read" id="styleRead" hidden></div>
+            </article>
+          </div>
+        </div>
+
+        <!-- ۲. خروجی -------------------------------------------------------- -->
+        <div class="panel" data-panel="2" hidden>
+          <h2>خروجی چه شکلی باشد؟</h2>
+          <p class="lede">نسبت تصویر همان بومی است که ویدیو روی آن رندر می‌شود.</p>
+
+          <h3 class="field-title">جنس کار</h3>
+          <div class="modes" id="modes"></div>
+
+          <div class="chips" id="delivers"></div>
+          <p class="note" id="modeNote"></p>
+
+          <div data-motion-only>
+            <h3 class="field-title">چگالی کارت‌ها</h3>
+            <div class="chips" id="densities"></div>
+            <h3 class="field-title">جنس باکس‌ها</h3>
+            <div class="chips" id="materials"></div>
+          </div>
+
+          <div data-captions-only>
+            <h3 class="field-title">چیدمان تصویر</h3>
+            <div class="chips" id="layouts"></div>
+          </div>
+
+          <div class="ratios" id="ratios"></div>
+
+          <div class="grid2">
+            <label class="field">
+              <span>کیفیت رندر</span>
+              <select id="quality"></select>
+            </label>
+            <label class="field" data-captions-only>
+              <span>فرمت فایل</span>
+              <select id="format">
+                <option value="mp4">MP4 (H.264)</option>
+                <option value="webm">WebM (با شفافیت)</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>سقف حجم (مگابایت)</span>
+              <input type="number" id="maxMb" min="10" max="200" step="10" value="200" />
+            </label>
+            <label class="field">
+              <span>نرخ فریم</span>
+              <input type="text" id="fps" value="۳۰ (قانون خانه)" readonly class="static" />
+            </label>
+          </div>
+        </div>
+
+        <!-- ۳. پس‌زمینه ----------------------------------------------------- -->
+        <div class="panel" data-panel="3" hidden>
+          <h2>پس‌زمینه</h2>
+          <p class="lede">پیش‌نمایش‌ها همان کدی هستند که رندر می‌شود؛ چیزی که می‌بینی همان چیزی است که می‌گیری.</p>
+          <p class="note" id="bgNote" data-motion-only hidden>
+            لایهٔ موشن شفاف است و روی ویدیوی خودت می‌نشیند؛ پس‌زمینه فقط برای «فیلم مستقل» و «فیلم زیرنویسی» به کار می‌آید.
+          </p>
+          <div class="backgrounds" id="backgrounds"></div>
+        </div>
+
+        <!-- ۴. جهت و تنظیمات ------------------------------------------------ -->
+        <div class="panel" data-panel="4" hidden>
+          <h2>دربارهٔ ادیت بنویس</h2>
+          <p class="lede">
+            هرچه دربارهٔ ریتم، برش، تأکید و حال‌وهوای کار بگویی اینجا می‌نویسی. عدد یا ادعایی از خودم اضافه نمی‌شود.
+          </p>
+          <textarea id="direction" rows="6" placeholder="مثلاً: شروع با تیتر روی پنل بالا، کات‌ها روی ضرب آهنگ، تأکید روی کلمهٔ «تجربه»، پایان با کارت قفل برند."></textarea>
+
+          <details class="advanced" data-captions-only>
+            <summary>متن‌های روی ویدیو (تیتر و کارت پایان)</summary>
+            <div class="grid2">
+              <label class="field"><span>رونوشت تیتر</span><input id="t-kicker" /></label>
+              <label class="field"><span>تیتر</span><input id="t-headline" /></label>
+              <label class="field"><span>کلمهٔ مینت</span><input id="t-accent" /></label>
+              <label class="field"><span>خط دوم</span><input id="t-sub" /></label>
+              <label class="field"><span>نام در کارت پایان</span><input id="e-name" /></label>
+              <label class="field"><span>نشانی در کارت پایان</span><input id="e-site" /></label>
+            </div>
+          </details>
+
+          <div data-motion-only>
+            <h3 class="field-title">صدای افکت</h3>
+            <label class="switch">
+              <input type="checkbox" id="sfxOn" checked />
+              <span>روی حرکت‌ها صدا بگذار</span>
+            </label>
+            <div class="chips" id="soundLevels"></div>
+            <p class="note" id="sfxNote"></p>
+
+            <details class="advanced">
+              <summary>موتور چه کارت‌هایی می‌تواند بزند؟</summary>
+              <ul class="recipes" id="recipes"></ul>
+            </details>
+          </div>
+
+          <h3 class="field-title">کار را چه کسی انجام دهد؟</h3>
+          <div class="engines" id="engines"></div>
+
+          <div class="provider" id="providerBox" hidden>
+            <div class="grid2">
+              <label class="field">
+                <span>سرویس‌دهنده</span>
+                <select id="provider"></select>
+              </label>
+              <label class="field">
+                <span>مدل</span>
+                <div class="row">
+                  <select id="model"><option value="">—</option></select>
+                  <button type="button" id="loadModels" class="ghost">بارگذاری</button>
+                </div>
+              </label>
+              <label class="field span2">
+                <span>کلید API (فقط روی همین دستگاه ذخیره می‌شود)</span>
+                <input id="apiKey" type="password" placeholder="••••••••" autocomplete="off" />
+              </label>
+              <label class="field span2" id="baseRow" hidden>
+                <span>آدرس پایه (OpenAI سازگار)</span>
+                <input id="baseUrl" placeholder="https://…/v1" />
+              </label>
+            </div>
+            <p class="note" id="providerNote"></p>
+          </div>
+
+          <h3 class="field-title">چقدر از توان سیستم؟</h3>
+          <div class="cpu">
+            <input type="range" id="cpu" min="10" max="100" step="5" value="50" />
+            <div class="cpu-read" id="cpuRead">—</div>
+          </div>
+          <ul class="warns" id="warns"></ul>
+
+          <div class="launch">
+            <button type="button" id="build" class="primary big">ساخت ویدیو</button>
+            <span class="tiny" id="launchHint"></span>
+          </div>
+        </div>
+      </section>
+
+      <footer class="bar">
+        <button type="button" id="back" class="ghost">مرحله قبل</button>
+        <span class="hint" id="stepHint"></span>
+        <button type="button" id="next" class="primary">مرحله بعد</button>
+      </footer>
+    </main>
+
+    <!-- صفحهٔ ساخت ----------------------------------------------------------- -->
+    <section id="build-view" hidden>
+      <div class="bv-head">
+        <button type="button" id="backToWizard" class="ghost">→ بازنشانی</button>
+        <h2 id="bv-title">—</h2>
+        <span class="status" id="bv-status">در انتظار</span>
+      </div>
+
+      <div class="progress">
+        <div id="bv-pct">۰٪</div>
+        <div class="progress-body">
+          <span id="bv-stage">—</span>
+          <div class="progress-track"><div class="progress-fill" id="bv-fill"></div></div>
+        </div>
+      </div>
+
+      <ol class="stage-list" id="bv-steps"></ol>
+
+      <div class="bv-grid">
+        <div class="log-box">
+          <div class="log-head"><span>لاگ</span><button type="button" id="copyWake" class="ghost tiny" hidden>کپی دستور بیداری</button></div>
+          <div class="log" id="bv-log"></div>
+        </div>
+        <div class="result">
+          <div id="bv-queue" class="queue" hidden></div>
+          <div id="bv-player" hidden>
+            <video id="bv-video" controls playsinline></video>
+            <div class="result-meta" id="bv-meta"></div>
+            <a class="primary big dl" id="bv-download" href="#">دانلود فایل</a>
+          </div>
+          <div id="bv-motion" class="motion-out" hidden>
+            <h3>روی ویدیوی خودت</h3>
+            <video id="bv-preview" controls playsinline></video>
+            <p class="tiny" id="bv-previewNote"></p>
+            <div class="artifacts" id="bv-artifacts"></div>
+          </div>
+          <div class="stills" id="bv-stills"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- فهرست مشاغل --------------------------------------------------------- -->
+    <section id="jobs-view" hidden>
+      <div class="bv-head">
+        <button type="button" id="jobsBack" class="ghost">→ ویزارد</button>
+        <h2>مشاغل</h2>
+        <button type="button" id="jobsRefresh" class="ghost tiny">نوسازی</button>
+      </div>
+      <ul class="jobs" id="jobs-list"></ul>
+    </section>
+
+    <!-- مرورگر فایل ---------------------------------------------------------- -->
+    <div class="modal" id="browser" hidden>
+      <div class="modal-box">
+        <div class="modal-head">
+          <span id="br-crumbs">—</span>
+          <button type="button" class="ghost" id="br-close">بستن</button>
+        </div>
+        <div class="modal-quick" id="br-quick"></div>
+        <ul class="modal-list" id="br-list"></ul>
+      </div>
+    </div>
+
+    <div class="toasts" id="toasts" aria-live="polite"></div>
+
+    <script src="i18n.js"></script>
+    <script src="engine.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>

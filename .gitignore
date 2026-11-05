@@ -1,0 +1,19 @@
+# Everything a user produces. Jobs, renders, panel config and the i18n work
+# files live under workspace/ and are never committed. Override the location
+# with VIDEO_STUDIO_HOME.
+workspace/
+
+# The sound kit is synthesised on first setup (`npm run sfx`) — small files,
+# but a clone stays honest when it builds its own.
+assets/sfx/
+assets/sfx-index.json
+
+# GSAP is fetched by `npm run vendor` under the GreenSock standard licence and
+# must not be redistributed here. The checksum is pinned in that script.
+**/assets/vendor/gsap.min.js
+
+node_modules/
+.npm-debug.log*
+
+.DS_Store
+Thumbs.db
