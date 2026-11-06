@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>فروشگاه asset — استودیوی ویدیو</title>
+  <link rel="stylesheet" href="app.css" />
+  <link rel="stylesheet" href="assets/fonts/vazirmatn.css" />
+  <script src="i18n.js"></script>
+  <style>
+    .store-main { max-width: 920px; margin: 0 auto; padding: var(--s7) clamp(20px, 4vw, 40px) 120px; }
+    .store-main h2 { font-size: clamp(24px, 3.2vw, 31px); font-weight: 800; line-height: 1.35; letter-spacing: -0.015em; margin-bottom: 6px; }
+    .store-main .lede { color: var(--muted); font-size: 14.5px; margin-bottom: var(--s6); max-width: 64ch; }
+    .store-pre {
+      background: var(--well); border: 1px solid var(--hairline); border-radius: var(--r-sm);
+      padding: 12px 14px; direction: ltr; text-align: left; overflow-x: auto;
+      font-family: var(--mono); font-size: 12.5px; line-height: 1.7; color: var(--ink);
+      margin: var(--s4) 0 var(--s6);
+    }
+    .packs { display: grid; gap: var(--s3); }
+    .pack {
+      display: flex; align-items: center; gap: var(--s4);
+      background: var(--panel); border: 1px solid var(--hairline); border-radius: var(--r-md);
+      padding: var(--s4) var(--s5); box-shadow: var(--el-1);
+    }
+    .pack .info { flex: 1; min-width: 0; }
+    .pack .name { font-size: 14.5px; font-weight: 700; }
+    .pack .what { color: var(--muted); font-size: 12.5px; line-height: 1.75; margin-top: 3px; }
+    .pack .meta { color: var(--faint); font-size: 11.5px; margin-top: 5px; direction: ltr; text-align: left; font-variant-numeric: tabular-nums; }
+    .pack .meta a { color: var(--accent); text-decoration: none; }
+    .pack .meta a:hover { text-decoration: underline; }
+    .pack .dl {
+      flex: none; border: 1px solid var(--accent-line); border-radius: var(--r-sm);
+      background: var(--accent-dim); color: var(--accent);
+      padding: 10px 18px; font-size: 13px; font-weight: 600; text-decoration: none;
+      transition: background var(--dur) var(--ease), color var(--dur) var(--ease);
+    }
+    .pack .dl:hover { background: var(--accent); color: var(--accent-ink); }
+    .pack-note { color: var(--faint); font-size: 12px; margin-top: var(--s5); line-height: 1.9; }
+    .store-topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: var(--s3); padding: 14px clamp(20px, 4vw, 40px); background: rgba(16,17,17,.78); backdrop-filter: blur(18px); border-bottom: 1px solid var(--hairline); }
+    .store-topbar .t { font-weight: 700; font-size: 14.5px; margin-inline-end: auto; }
+    .store-topbar a.back { color: var(--muted); font-size: 13px; text-decoration: none; border: 1px solid var(--hairline); border-radius: var(--r-pill); padding: 7px 14px; transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease); }
+    .store-topbar a.back:hover { color: var(--ink); border-color: var(--hairline-2); }
+  </style>
+</head>
+<body>
+  <header class="store-topbar">
+    <span class="t">فروشگاه asset — استودیوی ویدیو</span>
+    <a class="back" href="/">بازگشت به پنل</a>
+    <button type="button" class="ghost" id="langBtn" data-no-i18n>English</button>
+  </header>
+
+  <main class="store-main">
+    <h2>بسته‌های asset موشن گرافیک</h2>
+    <p class="lede">
+      هر چیزی که فیلم‌های موشن مرتباً لازم دارند: بافت‌های زمین، گرین سینمایی، و قلم مونوی ترمینال.
+      همه با لایسنس آزاد (CC0 و OFL)؛ با تأیید چک‌سام دانلود می‌شوند و اگر بسته‌ای در انبار نباشد،
+      طرح کد‌محور خودش جای آن را می‌گیرد و نبودش هیچ‌وقت رندر را نمی‌شکند.
+    </p>
+
+    <pre data-no-i18n># install everything (recommended)
+npm run textures
+npm run assets
+
+# or just one pack
+npm run assets -- --only tex-metal043a</pre>
+
+    <div class="packs">
+      <div class="pack">
+        <div class="info">
+          <div class="name">گرین فیلمی و بافت‌های سینتزی</div>
+          <div class="what">پلیت گرین ۱۰۸۰ با seed ثابت، ساختهٔ ffmpeg — جایگزین فیلتر SVG پرفریم؛ همان نگاه، کسر چشمگیر CPU.</div>
+          <div class="meta">generated · CC0-equivalent · ~1.5 MB · npm run textures</div>
+        </div>
+        <a class="dl" href="https://github.com/pedramgholizadeh/ai-agentic-video-studio/blob/main/scripts/build-textures.mjs">تولید محلی</a>
+      </div>
+
+      <div class="pack">
+        <div class="info">
+          <div class="name">قلم مونوی ترمینال — JetBrains Mono</div>
+          <div class="what">تایپ کارت ترمینال؛ روی هر سیستم‌عاملی یکسان به‌جای فال‌بک محلی.</div>
+          <div class="meta">OFL-1.1 · 5.4 MB · <a href="https://github.com/JetBrains/JetBrainsMono/releases/download/v2.304/JetBrainsMono-2.304.zip">دانلود مستقیم</a> · <a href="https://www.jetbrains.com/lp/mono/">upstream</a></div>
+        </div>
+        <a class="dl" href="https://github.com/JetBrains/JetBrainsMono/releases/download/v2.304/JetBrainsMono-2.304.zip">دانلود</a>
+      </div>
+
+      <div class="pack">
+        <div class="info">
+          <div class="name">بافت فلز مات — Metal043A</div>
+          <div class="what">فلز تیرهٔ براش‌خورده برای زمینِ نمای نزدیک محصول — پس‌زمینهٔ «فلز مات».</div>
+          <div class="meta">CC0-1.0 · 4.7 MB · <a href="https://ambientcg.com/get?file=Metal043A_1K-JPG.zip">دانلود مستقیم</a> · <a href="https://ambientcg.com/view?id=Metal043A">upstream</a></div>
+        </div>
+        <a class="dl" href="https://ambientcg.com/get?file=Metal043A_1K-JPG.zip">دانلود</a>
+      </div>
+
+      <div class="pack">
+        <div class="info">
+          <div class="name">بافت بتن خام — Concrete034</div>
+          <div class="what">بتن صنعتی بی‌ادعا برای پس‌زمینهٔ «بتن خام».</div>
+          <div class="meta">CC0-1.0 · 3.5 MB · <a href="https://ambientcg.com/get?file=Concrete034_1K-JPG.zip">دانلود مستقیم</a> · <a href="https://ambientcg.com/view?id=Concrete034">upstream</a></div>
+        </div>
+        <a class="dl" href="https://ambientcg.com/get?file=Concrete034_1K-JPG.zip">دانلود</a>
+      </div>
+
+      <div class="pack">
+        <div class="info">
+          <div class="name">بافت پارچهٔ بافته — Fabric066</div>
+          <div class="what">بافت نرم و لمس‌پذیر برای فیلم‌های کم‌انرژی — پس‌زمینهٔ «پارچهٔ بافته».</div>
+          <div class="meta">CC0-1.0 · 9.2 MB · <a href="https://ambientcg.com/get?file=Fabric066_1K-JPG.zip">دانلود مستقیم</a> · <a href="https://ambientcg.com/view?id=Fabric066">upstream</a></div>
+        </div>
+        <a class="dl" href="https://ambientcg.com/get?file=Fabric066_1K-JPG.zip">دانلود</a>
+      </div>
+    </div>
+
+    <p class="pack-note">
+      سرویس خودکار: موتور قبل از نوشتن پروژهٔ هر کار، نیازهای همان فیلم را از ورقهٔ بیت و
+      پس‌زمینهٔ انتخابی درمی‌آورد و بسته‌های جاافتاده را خودش دانلود می‌کند —
+      <span dir="ltr" data-no-i18n>npm run assets -- --auto --for-job &lt;id&gt;</span>.
+      هر بسته پس از دانلود با حجم و SHA-256 پین‌شده تأیید می‌شود؛ فایل ناسازگار دور ریخته می‌شود و
+      هرگز نصب نمی‌شود. مبدأ و لایسنس هر بسته در <code class="inline">lib/assets.mjs</code> ثبت است.
+    </p>
+  </main>
+</body>
+</html>

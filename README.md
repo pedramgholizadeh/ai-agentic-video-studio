@@ -124,6 +124,31 @@ write `log.txt` / `progress.json` as you go — the browser bar is tailing them.
 | Never pass `--max-bitrate` to a WebM render | it is MP4-only and breaks the VP9/alpha mux |
 | Never run `fit-size` on an alpha layer | its only encoder is libx264/`yuv420p`, which flattens the alpha; to shrink: `node scripts/motion.mjs slim --file <layer> --out <layer> --crf 30` |
 
+## The asset store
+
+Motion films need the same materials on repeat, so the studio keeps them in a
+store with two shelves:
+
+- **Generated** — `npm run textures` renders the film-grain plate with ffmpeg
+  (fixed seed, deterministic, CC0-equivalent by construction). The *film
+  grain* background prefers this plate over a per-frame SVG turbulence
+  filter — the same look for far less CPU.
+- **Fetched** — `npm run assets` downloads checksum-pinned packs: brushed
+  metal / concrete / fabric grounds (CC0, ambientCG) and the JetBrains Mono
+  typeface (OFL) for the terminal card. A file that does not match its pinned
+  size and SHA-256 is discarded, never installed. The new **metal**,
+  **concrete** and **fabric** backgrounds use them; when a pack is missing
+  every background falls back to its code-drawn look — a missing asset never
+  breaks a render.
+
+The **curator** is the auto part: before a job's project is written, the
+engine reads the chosen background and the beat sheet and downloads exactly
+what that film needs (`npm run assets -- --auto --for-job <id>` does the same
+by hand). The one-click view — every pack with licence, size and a direct
+download link — lives at
+[assets.html](https://pedramgholizadeh.github.io/ai-agentic-video-studio/assets.html)
+(also `ui/assets.html` in the repo), linked from the panel's top bar.
+
 ## The hosted panel (GitHub Pages) and the loopback bridge
 
 <https://pedramgholizadeh.github.io/ai-agentic-video-studio/> serves the static

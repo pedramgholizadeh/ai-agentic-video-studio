@@ -22,6 +22,7 @@ import {
   WORKSPACE,
   missingKit,
 } from '../lib/paths.mjs';
+import { storeReport } from '../lib/assets.mjs';
 
 const rows = [];
 const add = (label, ok, detail, kind = 'required') => rows.push({ label, ok, detail, kind });
@@ -73,6 +74,16 @@ add(
   'whisper model (offline)',
   modelOk,
   modelOk ? `${modelPath}` : 'missing — jobs without captions need the network; run npm run models',
+  'optional',
+);
+
+/* The asset store: generated plates + fetched packs (textures, mono font). */
+const store = storeReport();
+const havePacks = store.packs.filter((p) => p.status.present).length;
+add(
+  'asset store',
+  havePacks === store.packs.length && store.generated.status.present,
+  `${havePacks}/${store.packs.length} packs + ${store.generated.status.present ? 'generated plates' : 'no generated plates (npm run textures)'} in ${store.root}`,
   'optional',
 );
 

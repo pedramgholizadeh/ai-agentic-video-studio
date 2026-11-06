@@ -17,3 +17,8 @@ node_modules/
 
 .DS_Store
 Thumbs.db
+
+# The asset store is per-machine: generated plates (npm run textures) and
+# fetched packs (npm run assets) — both rebuilt with one command. Only
+# lib/assets.mjs (the registry) is committed.
+assets/store/

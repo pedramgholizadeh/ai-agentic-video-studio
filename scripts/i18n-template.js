@@ -104,12 +104,12 @@
         const bare = norm(s);
         /* a Persian-digit run is a number: pass it through, toLatin catches it */
         if (!HAS_FA.test(bare.replace(/[\u06F0-\u06F9\u0660-\u0669]/g, ''))) return s;
-        /* a lone word is more often a unit or function word (بار = times, not
-         * the load readout); a multi-word run is a phrase. Look there first. */
+        /* a lone word is more often a unit, a function word, or a connector
+         * (بار = times, و = and); a multi-word run is a phrase. */
         const stripped = bare.replace(/[ًٍَّ]/g, '');
         const hit = bare.includes(' ')
           ? (phrases.get(bare) ?? WORDS[bare] ?? WORDS[stripped])
-          : (WORDS[bare] ?? WORDS[stripped] ?? phrases.get(bare));
+          : (WORDS[bare] ?? WORDS[stripped] ?? CONNECTORS[bare] ?? phrases.get(bare));
         if (hit === undefined) ok = false;
         return hit === undefined ? s : hit;
       });

@@ -933,7 +933,82 @@
   "موتور بدون فلگ اجازه به هیچ سایتی جواب نمی‌دهد؛ هر درخواست تغییر وضعیت باید سرآیند": "Without the flag the engine answers no site; every state-changing request must carry the header",
   "در ریپو": "in the repo",
   "سافاری گاهی تماس با آدرس‌های": "Safari sometimes blocks calls to",
-  "را می‌بندد؛ آدرس محلی این است": "addresses; the local address is:"
+  "را می‌بندد؛ آدرس محلی این است": "addresses; the local address is:",
+  "؛ با تأیید چک‌سام دانلود می‌شوند و کد رندر اگر بسته‌ای نباشد،": "; downloads are checksum-verified, and when a pack is missing the",
+  "امنیت این پل دو لایه دارد. موتور بدون فلگ اجازه به هیچ سایتی جواب نمی‌دهد؛": "This bridge has two security layers. Without the flag the engine answers no site;",
+  "بافت بتن": "concrete texture",
+  "بافت بتن خام — Concrete034": "Raw concrete — Concrete034",
+  "بافت پارچه": "fabric texture",
+  "بافت پارچهٔ بافته — Fabric066": "Woven fabric — Fabric066",
+  "بافت پارچه‌ای نرم برای فیلم‌های کم‌انرژی": "a soft tactile ground for low-energy films",
+  "بافت فلز تیره — زمینِ نمای نزدیک محصول": "dark brushed metal — the product-closeup ground",
+  "بافت فلز مات": "brushed metal texture",
+  "بافت فلز مات — Metal043A": "Brushed metal — Metal043A",
+  "بافت نرم و لمس‌پذیر برای فیلم‌های کم‌انرژی — پس‌زمینهٔ «پارچهٔ بافته».": "a soft tactile ground for low-energy films — the “Woven fabric” background.",
+  "بتن خام": "Raw concrete",
+  "بتن خامِ صنعتی، بی‌ادعا": "honest industrial concrete",
+  "بتن صنعتی بی‌ادعا برای پس‌زمینهٔ «بتن خام».": "honest industrial concrete for the “Raw concrete” background.",
+  "بسته‌های asset موشن گرافیک": "Motion-graphics asset packs",
+  "پارچهٔ بافته": "Woven fabric",
+  "پس‌زمینهٔ انتخابی درمی‌آورد و بسته‌های جاافتاده را خودش دانلود می‌کند —": "it reads the chosen background and the beat sheet, and downloads the missing packs —",
+  "پلیت گرین ۱۰۸۰ با seed ثابت، ساختهٔ ffmpeg — جایگزین فیلتر SVG پرفریم؛ همان نگاه، کسر چشمگیر CPU": "a 1080 grain plate with a fixed seed, built by ffmpeg — it replaces the per-frame SVG filter; the same look for far less CPU",
+  "تایپ کارت ترمینال؛ روی هر سیستم‌عاملی یکسان به‌جای فال‌بک محلی.": "the terminal card’s typeface; identical on every OS instead of a local fallback.",
+  "تولید محلی": "build locally",
+  "ثبت است.": "",
+  "جایگزین کد-رسم خودش را دارد — نبودِ asset هیچ‌وقت رندر را نمی‌شکند.": "has a code-drawn fallback — a missing asset never breaks the render.",
+  "جزئیات:": "Details:",
+  "دانلود": "Download",
+  "دانلود مستقیم": "direct download",
+  "در پنل میزبان، بنر «موتوری پیدا نشد» می‌آید. عدد پورت را در فیلد «پورت موتور» بنویس": "On the hosted panel the “no engine found” banner appears. Type the port into the “Engine port” field",
+  "در ریپو.": "in the repo.",
+  "را می‌بندد؛ آدرس محلی این است:": "addresses; the local address is:",
+  "راهنمای پورت موتور — استودیوی ویدیو": "Engine port guide — Video Studio",
+  "سرویس خودکار: موتور قبل از نوشتن پروژهٔ هر کار، نیازهای همان فیلم را از ورقهٔ بیت و": "The auto service: before writing a job’s project the engine reads that film’s needs from the beat sheet and the",
+  "فلز مات": "Brushed metal",
+  "قلم مونوی ترمینال": "the terminal mono typeface",
+  "قلم مونوی ترمینال — JetBrains Mono": "Terminal mono typeface — JetBrains Mono",
+  "گرین فیلمی و بافت‌های سینتزی": "Film grain and synthesised textures",
+  "گرین و بافت‌های سینتزی": "film grain and synthesised textures",
+  "مالِ وقتی است که پنل را از سایت میزبان باز کنی؛": "matters when you open the panel from the hosted site;",
+  "نیازمند asset store": "needs the asset store",
+  "و «دوباره امتحان کن» را بزن. انتخابت در همین مرورگر به خاطر سپرده می‌شود و دفعهٔ بعد خودکار وصل": "and press “Try again”. Your choice is remembered in this browser and next time it connects",
+  "هر بسته پس از دانلود با حجم و SHA-256 پین‌شده تأیید می‌شود؛ فایل ناسازگار دور ریخته می‌شود و": "every pack is verified after download against its pinned size and SHA-256; a mismatched file is discarded and",
+  "هر چیزی که فیلم‌های موشن مرتباً لازم دارند: بافت‌های زمین، گرین سینمایی، و قلم مونوی ترمینال.": "Everything motion films need on repeat: ground textures, cinematic grain, and the terminal mono typeface.",
+  "هر درخواست تغییر وضعیت باید سرآیند": "every state-changing request must carry the header",
+  "همه با لایسنس آزاد": "All free-licensed",
+  "assetها": "Assets",
+  "می‌شود.": "",
+  "پلیت گرین ۱۰۸۰ با seed ثابت، ساختهٔ ffmpeg — جایگزین فیلتر SVG پرفریم؛ همان نگاه، کسر چشمگیر CPU.": "a 1080 grain plate with a fixed seed, built by ffmpeg — it replaces the per-frame SVG filter; the same look for far less CPU.",
+  "فروشگاه asset — استودیوی ویدیو": "Asset store — Video Studio",
+  "فلز تیرهٔ براش‌خورده برای زمینِ نمای نزدیک محصول — پس‌زمینهٔ «فلز مات».": "dark brushed metal for the product-closeup ground — the “Brushed metal” background.",
+  "و «دوباره امتحان کن» را بزن. انتخابت در همین مرورگر به خاطر سپرده می‌شود و دفعهٔ بعد خودکار وصل می‌شود.": "and press “Try again”. Your choice is remembered in this browser and next time it connects by itself.",
+  "هرگز نصب نمی‌شود. مبدأ و لایسنس هر بسته در": "is discarded, never installed. Every pack’s source and licence live in",
+  "هر چیزی که فیلم‌های موشن مرتباً لازم دارند": "Everything motion films need on repeat",
+  "بافت‌های زمین، گرین سینمایی، و قلم مونوی ترمینال": "ground textures, cinematic grain, and the terminal mono typeface",
+  "؛ با تأیید چک‌سام دانلود می‌شوند و کد رندر اگر بسته‌ای نباشد": "; downloads are checksum-verified and when a pack is missing the",
+  "اگر بسته‌ای در انبار نباشد، طرح کد‌محور خودش جای آن را می‌گیرد و نبودش هیچ‌وقت رندر را نمی‌شکند": "the code-drawn stand-in takes its place and a missing pack never breaks the render",
+  "هرگز نصب نمی‌شود": "",
+  "مبدأ و لایسنس هر بسته در": "Every pack’s source and licence live in",
+  "بسته پس از دانلود با حجم و": "Every pack is verified after download against its pinned size and",
+  "تأیید می‌شود؛ فایل ناسازگار دور ریخته می‌شود و": "SHA-256; a mismatched file is discarded and",
+  "را می‌بندد": "",
+  "بافت نرم و لمس‌پذیر برای فیلم‌های کم‌انرژی — پس‌زمینهٔ «پارچهٔ بافته»": "a soft tactile ground for low-energy films — the “Woven fabric” background",
+  "بتن صنعتی بی‌ادعا برای پس‌زمینهٔ «بتن خام»": "honest industrial concrete for the “Raw concrete” background",
+  "تایپ کارت ترمینال؛ روی هر سیستم‌عاملی یکسان به‌جای فال‌بک محلی": "the terminal card’s typeface; identical on every OS instead of a local fallback",
+  "ثبت است": "",
+  "جایگزین کد-رسم خودش را دارد — نبودِ asset هیچ‌وقت رندر را نمی‌شکند": "has a code-drawn fallback — a missing asset never breaks the render",
+  "هر چیزی که فیلم‌های موشن مرتباً لازم دارند: بافت‌های زمین، گرین سینمایی، و قلم مونوی ترمینال": "Everything motion films need on repeat: ground textures, cinematic grain, and the terminal mono typeface",
+  "می‌شود": "",
+  "فلز تیرهٔ براش‌خورده برای زمینِ نمای نزدیک محصول — پس‌زمینهٔ «فلز مات»": "dark brushed metal for the product-closeup ground — the “Brushed metal” background",
+  "؛ با تأیید چک‌سام دانلود می‌شوند و اگر بسته‌ای در انبار نباشد،": "; downloads are checksum-verified and if a pack is not in the store,",
+  "طرح کد‌محور خودش جای آن را می‌گیرد و نبودش هیچ‌وقت رندر را نمی‌شکند.": "the code-drawn stand-in takes its place and a missing pack never breaks the render.",
+  "طرح کد‌محور خودش جای آن را می‌گیرد و نبودش هیچ‌وقت رندر را نمی‌شکند": "the code-drawn stand-in takes its place and a missing pack never breaks the render",
+  "؛ با تأیید چک‌سام دانلود می‌شوند و اگر بسته‌ای در انبار نباشد، طرح کد‌محور خودش جای آن را می‌گیرد و نبودش هیچ‌وقت رندر را نمی‌شکند": "; downloads are checksum-verified and if a pack is not in the store, the code-drawn stand-in takes its place and a missing pack never breaks the render",
+  "سرویس خودکار": "The auto service",
+  "موتور قبل از نوشتن پروژهٔ هر کار، نیازهای همان فیلم را از ورقهٔ بیت و پس‌زمینهٔ انتخابی درمی‌آورد و بسته‌های جاافتاده را خودش دانلود می‌کند": "reads that film’s needs from the beat sheet and the chosen background and downloads the missing packs by itself",
+  "پین‌شده تأیید می‌شود؛ فایل ناسازگار دور ریخته می‌شود و": "SHA-256; a mismatched file is discarded and",
+  "هر بسته پس از دانلود با حجم و": "Every pack is verified after download against its pinned size and",
+  "پین‌شده تأیید می‌شود؛ فایل ناسازگار دور ریخته می‌شود و هرگز نصب نمی‌شود": "SHA-256; a mismatched file is discarded and never installed"
 };
 
   /* Word-level table for interpolated text. Deliberately small and specific:
@@ -1257,12 +1332,12 @@
         const bare = norm(s);
         /* a Persian-digit run is a number: pass it through, toLatin catches it */
         if (!HAS_FA.test(bare.replace(/[\u06F0-\u06F9\u0660-\u0669]/g, ''))) return s;
-        /* a lone word is more often a unit or function word (بار = times, not
-         * the load readout); a multi-word run is a phrase. Look there first. */
+        /* a lone word is more often a unit, a function word, or a connector
+         * (بار = times, و = and); a multi-word run is a phrase. */
         const stripped = bare.replace(/[ًٍَّ]/g, '');
         const hit = bare.includes(' ')
           ? (phrases.get(bare) ?? WORDS[bare] ?? WORDS[stripped])
-          : (WORDS[bare] ?? WORDS[stripped] ?? phrases.get(bare));
+          : (WORDS[bare] ?? WORDS[stripped] ?? CONNECTORS[bare] ?? phrases.get(bare));
         if (hit === undefined) ok = false;
         return hit === undefined ? s : hit;
       });

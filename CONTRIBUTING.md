@@ -39,6 +39,8 @@ dictionaries do not translate — see *UI copy* below.
 | `sfx` | re-synthesise the 33 kit one-shots (`assets/sfx/`) |
 | `vendor` | re-fetch GSAP 3.15.1 with checksum enforcement |
 | `models` | pre-download the offline Whisper model (`--model`, `--check`) |
+| `textures` | build the generated grain plate into the asset store |
+| `assets` | fetch the pinned asset packs; `--auto --for-job <id>` is the curator |
 | `motion` | the engine CLI (`inspect`, `slim`, `fit-size`, …) |
 | `i18n` | regenerate `ui/i18n.js` from the dictionaries |
 | `i18n:extract` | inventory every user-visible Persian string |

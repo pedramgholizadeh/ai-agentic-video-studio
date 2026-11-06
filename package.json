@@ -17,7 +17,9 @@
     "i18n": "node scripts/build-i18n.mjs",
     "i18n:extract": "node scripts/extract-i18n.mjs",
     "i18n:check": "node scripts/extract-i18n.mjs --coverage",
-    "models": "node scripts/fetch-models.mjs"
+    "models": "node scripts/fetch-models.mjs",
+    "textures": "node scripts/build-textures.mjs",
+    "assets": "node scripts/fetch-assets.mjs"
   },
   "keywords": [
     "video",
