@@ -29,9 +29,19 @@ import { loudness, ffprobeJson, run } from '../lib/ffmpeg.mjs';
 import { runSrt } from '../lib/compose.mjs';
 
 const [cmd, ...argv] = process.argv.slice(2);
+/* Agents hand the CLI relative paths (they run from the repo root); some
+ * commands shift the working directory internally (the beats stage parses the
+ * SRT from a temp dir), so every file-like flag is pinned to an absolute path
+ * the moment it is read. */
+const PATH_FLAGS = new Set([
+  'srt', 'style', 'out', 'beats', 'dir', 'video', 'file', 'base', 'layer',
+  'voice', 'sfx', 'note', 'input', 'output',
+]);
 const opt = (name, fb = null) => {
   const i = argv.indexOf(`--${name}`);
-  return i >= 0 ? argv[i + 1] : fb;
+  if (i < 0) return fb;
+  const v = argv[i + 1];
+  return PATH_FLAGS.has(name) && v && !path.isAbsolute(v) ? path.resolve(v) : v;
 };
 const say = (o) => console.log(JSON.stringify(o, null, 2));
 const tmp = fs.mkdtempSync(path.join('/tmp', 'hf-motion-'));

@@ -102,18 +102,32 @@ the job folder, and any CLI agent opened on the repository takes it from
 there:
 
 ```sh
-node cli.mjs list                    # what is in the queue
-node cli.mjs next                    # claim the next queued job; prints HANDOFF.md
-node cli.mjs log <id>                # tail the job log
-node cli.mjs progress <id>           # machine-readable progress
-node cli.mjs done <id> --note "..."  # hand the result back to the browser
-node cli.mjs fail <id> --error "..." # or report a failure
-node cli.mjs power 50                # set the CPU budget for every render
-node cli.mjs show <id>               # artifact paths
+node cli.mjs list                        # what is in the queue
+node cli.mjs next                        # claim the next queued job; prints HANDOFF.md
+node cli.mjs log <id> <level> <text>     # tail into the browser log
+node cli.mjs progress <id> <stage> <0-100>   # machine-readable progress
+node cli.mjs done <id> <file>            # ffprobe + mark succeeded (budget-checked)
+node cli.mjs fail <id> <why>             # or report a failure
+node cli.mjs power 50                    # set the CPU budget for every render
+node cli.mjs show <id>                   # artifact paths
 ```
 
 The agent contract in one line: read `HANDOFF.md`, keep the power limits, and
 write `log.txt` / `progress.json` as you go — the browser bar is tailing them.
+
+### Works with the popular agents
+
+| Agent | How it picks the studio up |
+|---|---|
+| **ZCode** | reads [`AGENTS.md`](AGENTS.md); the project skill `.agents/skills/studio-queue/` gives it the claim-and-deliver loop |
+| **Codex CLI** | reads `AGENTS.md` natively |
+| **Claude Code** | reads `CLAUDE.md` (a symlink to `AGENTS.md`) and the skill in `.claude/skills/studio-queue/` |
+| **Qoder** | reads `AGENTS.md` (officially supported per Qoder's rules docs) |
+| **Antigravity** | reads `AGENTS.md` and mounts the skill from `.agents/skills/` |
+
+`AGENTS.md` is the single source of truth; the per-agent files point at it.
+The per-job `HANDOFF.md` is agent-agnostic by design — exact commands, no
+tool-specific vocabulary.
 
 ## WebM alpha rules (they cost hours to learn; read before touching ffmpeg)
 
