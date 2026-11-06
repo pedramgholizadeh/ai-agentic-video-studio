@@ -16,7 +16,8 @@
     "motion": "node scripts/motion.mjs",
     "i18n": "node scripts/build-i18n.mjs",
     "i18n:extract": "node scripts/extract-i18n.mjs",
-    "i18n:check": "node scripts/extract-i18n.mjs --coverage"
+    "i18n:check": "node scripts/extract-i18n.mjs --coverage",
+    "models": "node scripts/fetch-models.mjs"
   },
   "keywords": [
     "video",

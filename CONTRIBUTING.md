@@ -38,6 +38,7 @@ dictionaries do not translate — see *UI copy* below.
 | `setup` | `build-sfx` + `vendor` (run once per clone) |
 | `sfx` | re-synthesise the 33 kit one-shots (`assets/sfx/`) |
 | `vendor` | re-fetch GSAP 3.15.1 with checksum enforcement |
+| `models` | pre-download the offline Whisper model (`--model`, `--check`) |
 | `motion` | the engine CLI (`inspect`, `slim`, `fit-size`, …) |
 | `i18n` | regenerate `ui/i18n.js` from the dictionaries |
 | `i18n:extract` | inventory every user-visible Persian string |
@@ -56,6 +57,23 @@ dictionaries do not translate — see *UI copy* below.
 
 A PR that touches rendering should include the `ffprobe` line proving it:
 30 fps, the expected size, and `ALPHA_MODE=1` when alpha is expected.
+
+## Motion craft rules
+
+The choreography in `assets/*/hypermotion.js` and the two writers encodes a
+small set of rules distilled from the shotcraft craft cards; keep them when
+you touch a `draw()` case:
+
+- one shared ease drives every channel of a word's entrance (y, blur, opacity
+  move as one progress) — split channels and the softness falls apart;
+- group entrances **accelerate** (`HM.deal`), they never march in uniform
+  steps;
+- a card's entrance starts before its beat and lands on it (`enter()` in
+  `lib/motion-project.mjs`) — the pop answers the music;
+- beats move the element layer, never the whole frame — full-frame pulses are
+  capped at three per film by house rule;
+- light effects (glow, sweep) are protagonist-only, once per segment, and
+  clipped to rounded bounds.
 
 ## How to add things
 

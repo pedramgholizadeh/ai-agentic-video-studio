@@ -49,6 +49,25 @@ only, and has zero runtime npm dependencies.
   the transcription engine (Whisper) is only needed when you give audio
   without captions
 
+## Offline transcription
+
+A job that arrives **without** a captions file is transcribed with Whisper
+(via HyperFrames) — a ~465 MB multilingual model, fetched once and cached at
+`~/.cache/hyperframes/whisper/models/`. To prepare a machine for offline use
+(or a flaky connection), download it ahead of time:
+
+```sh
+npm run models            # whisper "small" — the studio default, Persian-capable
+npm run models --check    # exit 0 when the model is already cached
+npm run models -- --model large-v3   # any model hyperframes pins (up to ~3 GB)
+```
+
+`npm run doctor` reports the model's presence as *whisper model (offline)*.
+Downloads are checksum-pinned against HyperFrames' own model table — a file
+that does not match its SHA-256 is discarded. The machine the model lands on
+is the machine that renders; `HYPERFRAMES_CACHE_DIR` moves the cache if you
+keep models elsewhere.
+
 ## Quickstart
 
 ```sh
@@ -125,7 +144,11 @@ Two rules make that safe, both enforced by the engine (`lib/cors.mjs`):
 Browser reality: Chrome treats loopback as potentially trustworthy and asks
 one private-network question, which the engine answers; **Safari may refuse
 `https → http://127.0.0.1`** — in that case open
-<http://127.0.0.1:8790> directly and use the panel there.
+<http://127.0.0.1:8790> directly and use the panel there. If your engine runs
+on a different port, the hosted panel's banner takes any port in its retry
+field, and the whole procedure is written up on the site's
+[port guide](https://pedramgholizadeh.github.io/ai-agentic-video-studio/port.html)
+(also in `ui/port.html`).
 
 ## How the bilingual panel works
 

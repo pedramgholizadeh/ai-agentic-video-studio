@@ -148,7 +148,7 @@ function goto(n) {
     if (s === S.step) li.setAttribute('aria-current', 'step');
     else li.removeAttribute('aria-current');
   });
-  /* ریل خط لوله — پیشرفت واقعی مراحل */
+  /* pipeline rail — real step progress */
   const railFill = document.querySelector('.rail i');
   if (railFill) railFill.style.width = `${((S.step - 1) / 3) * 100}%`;
   $('#back').style.visibility = S.step === 1 ? 'hidden' : 'visible';

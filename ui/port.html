@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>راهنمای پورت موتور — استودیوی ویدیو</title>
+  <link rel="stylesheet" href="app.css" />
+  <link rel="stylesheet" href="assets/fonts/vazirmatn.css" />
+  <script src="i18n.js"></script>
+  <style>
+    .port-main { max-width: 860px; margin: 0 auto; padding: var(--s7) clamp(20px, 4vw, 40px) 120px; }
+    .port-main h2 { font-size: clamp(24px, 3.2vw, 31px); font-weight: 800; line-height: 1.35; letter-spacing: -0.015em; margin-bottom: 6px; }
+    .port-main .lede { color: var(--muted); font-size: 14.5px; margin-bottom: var(--s6); max-width: 62ch; }
+    .port-card {
+      background: var(--panel);
+      border: 1px solid var(--hairline);
+      border-radius: var(--r-lg);
+      padding: var(--s5);
+      margin-bottom: var(--s4);
+      box-shadow: var(--el-1);
+    }
+    .port-card h3 { display: flex; align-items: center; gap: 10px; font-size: 15.5px; font-weight: 700; margin-bottom: 10px; }
+    .port-card h3 .n {
+      width: 24px; height: 24px; flex: none; display: grid; place-items: center;
+      border-radius: 50%; background: var(--accent); color: var(--accent-ink);
+      font-size: 12px; font-weight: 700;
+    }
+    .port-card p { color: var(--muted); font-size: 13.5px; line-height: 1.85; margin-bottom: 10px; }
+    .port-card pre {
+      background: var(--well); border: 1px solid var(--hairline); border-radius: var(--r-sm);
+      padding: 12px 14px; direction: ltr; text-align: left; overflow-x: auto;
+      font-family: var(--mono); font-size: 12.5px; line-height: 1.7; color: var(--ink);
+      margin: 10px 0;
+    }
+    .port-card code.inline { background: var(--well); border: 1px solid var(--hairline); border-radius: 6px; padding: 1px 7px; direction: ltr; unicode-bidi: isolate; font-family: var(--mono); font-size: 12px; }
+    .port-card .note { color: var(--faint); font-size: 12.5px; line-height: 1.8; margin-top: 8px; }
+    .port-topbar { position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: var(--s3); padding: 14px clamp(20px, 4vw, 40px); background: rgba(16,17,17,.78); backdrop-filter: blur(18px); border-bottom: 1px solid var(--hairline); }
+    .port-topbar a.back { color: var(--muted); font-size: 13px; text-decoration: none; border: 1px solid var(--hairline); border-radius: var(--r-pill); padding: 7px 14px; transition: color var(--dur) var(--ease), border-color var(--dur) var(--ease); }
+    .port-topbar a.back:hover { color: var(--ink); border-color: var(--hairline-2); }
+    .port-topbar .t { font-weight: 700; font-size: 14.5px; margin-inline-end: auto; }
+  </style>
+</head>
+<body>
+  <header class="port-topbar">
+    <span class="t">راهنمای پورت موتور</span>
+    <a class="back" href="/">بازگشت به پنل</a>
+    <button type="button" class="ghost" id="langBtn" data-no-i18n>English</button>
+  </header>
+
+  <main class="port-main">
+    <h2>اتصال پنل سایت به موتورِ روی رایانهٔ خودت</h2>
+    <p class="lede">
+      سایت فقط پیش‌نمایش است؛ ویدیو روی دستگاه خودت ساخته می‌شود.
+      این صفحه، راه بالا آوردن موتور روی هر پورت و وصل کردن پنل میزبان به همان پورت است.
+    </p>
+
+    <section class="port-card">
+      <h3><span class="n">۱</span> موتور روی پورت دلخواه</h3>
+      <p><code class="inline">8790</code> پورت پیش‌فرض است. برای پورت خودت:</p>
+      <pre data-no-i18n>npm start -- --port 8801 --allow-origin pages</pre>
+      <p class="note">
+        فلگ <code class="inline">--allow-origin</code> مالِ وقتی است که پنل را از سایت میزبان باز کنی؛
+        پنل محلی روی <code class="inline">127.0.0.1</code> به آن نیاز ندارد.
+        موتور همیشه فقط روی <code class="inline">127.0.0.1</code> گوش می‌دهد — هرگز روی شبکه نیست.
+      </p>
+    </section>
+
+    <section class="port-card">
+      <h3><span class="n">۲</span> گفتن پورت به پنل میزبان</h3>
+      <p>
+        در پنل میزبان، بنر «موتوری پیدا نشد» می‌آید. عدد پورت را در فیلد «پورت موتور» بنویس
+        و «دوباره امتحان کن» را بزن. انتخابت در همین مرورگر به خاطر سپرده می‌شود و دفعهٔ بعد خودکار وصل می‌شود.
+      </p>
+      <p class="note">
+        همین حالا امتحان کن: <a href="/" style="color:var(--accent)">باز کردن پنل میزبان</a>.
+      </p>
+    </section>
+
+    <section class="port-card">
+      <h3><span class="n">۳</span> وقتی مرورگر اجازهٔ تماس نداد</h3>
+      <p>
+        سافاری گاهی تماس با آدرس‌های <code class="inline">https</code> را می‌بندد؛ آدرس محلی این است:
+      </p>
+      <pre data-no-i18n>http://127.0.0.1:8790</pre>
+      <p class="note">
+        امنیت این پل دو لایه دارد. موتور بدون فلگ اجازه به هیچ سایتی جواب نمی‌دهد؛
+        هر درخواست تغییر وضعیت باید سرآیند <code class="inline">x-video-studio: 1</code> را داشته باشد.
+        جزئیات: <code class="inline">SECURITY.md</code> در ریپو.
+      </p>
+    </section>
+  </main>
+</body>
+</html>

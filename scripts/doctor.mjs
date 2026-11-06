@@ -59,6 +59,23 @@ add('free disk', diskFree === null || diskFree >= 4, diskFree === null ? 'unknow
 add('workspace', fs.existsSync(JOBS_ROOT) || mkdirs(), WORKSPACE, 'info');
 const kit = fs.existsSync(SFX_DIR) ? fs.readdirSync(SFX_DIR).filter((d) => fs.statSync(path.join(SFX_DIR, d)).isDirectory()).length : 0;
 add('sound-effect kit', kit > 0, kit ? `${kit} categories in ${SFX_DIR}` : 'run npm run sfx', 'optional');
+
+/* Offline transcription: the whisper model the studio runs when a job arrives
+ * without captions. Present → a job works with the network unplugged. */
+const modelPath = (() => {
+  const root = process.env.HYPERFRAMES_CACHE_DIR
+    ? path.resolve(process.env.HYPERFRAMES_CACHE_DIR)
+    : path.join(os.homedir(), '.cache', 'hyperframes');
+  return path.join(root, 'whisper', 'models', 'ggml-small.bin');
+})();
+const modelOk = fs.existsSync(modelPath) && fs.statSync(modelPath).size > 100 * 1024 * 1024;
+add(
+  'whisper model (offline)',
+  modelOk,
+  modelOk ? `${modelPath}` : 'missing — jobs without captions need the network; run npm run models',
+  'optional',
+);
+
 add('cool-render wrapper', !!COOL_RUN, COOL_RUN ?? 'renders would run at full CPU — see tools/cool-render', 'optional');
 
 for (const m of missingKit()) add('setup step', false, m, 'optional');
