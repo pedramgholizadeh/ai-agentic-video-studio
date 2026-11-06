@@ -1145,3 +1145,22 @@ button, .btn {
    (The video itself stays Persian and RTL in every locale.) */
 html[lang='en'] .log .msg { direction: ltr; }
 html[lang='en'] .cpu-read { direction: ltr; text-align: start; }
+
+/* ====================================== پروفایل سبک رفرنس (styleRead) === */
+
+.st-frames { display: flex; gap: var(--s2); align-items: flex-end; margin: var(--s3) 0 var(--s4); }
+.st-frames .st-frame { width: 118px; border-radius: var(--r-sm); border: 1px solid var(--hairline); display: block; }
+.st-frames-cap { color: var(--faint); font-size: 11px; margin-inline-start: var(--s2); }
+
+.st-gauges { display: grid; gap: var(--s3); margin: var(--s3) 0; max-width: 460px; }
+.st-gauge { display: grid; grid-template-columns: 52px 1fr auto; align-items: center; gap: var(--s3); }
+.st-glabel { color: var(--faint); font-size: 12px; }
+.st-gbar { display: block; height: 6px; border-radius: var(--r-pill); background: var(--hairline); overflow: hidden; }
+.st-gbar i { display: block; height: 100%; border-radius: inherit;
+  background: linear-gradient(90deg, var(--accent-2), var(--accent)); box-shadow: 0 0 10px rgba(85,230,165,0.4); }
+.st-gval { color: var(--ink); font-size: 12.5px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.st-strip { display: flex; align-items: center; gap: 5px; height: 12px; }
+.st-strip i { width: 2px; height: 100%; border-radius: 1px; background: var(--accent); display: block; }
+
+.st-chips { display: flex; gap: var(--s2); flex-wrap: wrap; margin: var(--s2) 0; }
+.st-apply { margin-top: var(--s2); }

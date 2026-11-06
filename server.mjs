@@ -10,6 +10,8 @@
 import fs from 'node:fs';
 import http from 'node:http';
 import os from 'node:os';
+import crypto from 'node:crypto';
+import { spawn } from 'node:child_process';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -29,6 +31,8 @@ import { enqueue, handoffDocument } from './lib/agent.mjs';
 import { runJob, cancel, isBusy, activeIds } from './lib/runner.mjs';
 import { json, text, readBody, sendFile, sse, pipeToFile, safeName } from './lib/http.mjs';
 import { MARKER, corsHeaders, hasMarker, isMutating, isSelf, parseAllowed } from './lib/cors.mjs';
+import * as editorApi from './lib/editor.mjs';
+import { packDir, packById } from './lib/assets.mjs';
 
 const UI = path.join(STUDIO_ROOT, 'ui');
 const UPLOADS = path.join(CONFIG_DIR, 'uploads');
@@ -277,7 +281,132 @@ const server = http.createServer(async (req, res) => {
       if (!file || !fs.existsSync(file)) return json(res, 400, { error: 'فایل رفرنس پیدا نشد.' });
       const started = Date.now();
       const style = await analyzeReference(file, { out: body.out || null });
+      /* three small frames so the panel can show WHAT was learned — the
+       * reference's own look, not just numbers about it */
+      try {
+        const dur = Math.max(0.1, style.analysisWindow || style.meta?.duration || 1);
+        const frames = await Promise.all(
+          [0.12, 0.5, 0.88].map((at) =>
+            new Promise((resolve) => {
+              const out = path.join(os.tmpdir(), `ref-frame-${Math.random().toString(36).slice(2)}.jpg`);
+              const child = spawn(
+                'ffmpeg',
+                ['-y', '-loglevel', 'error', '-ss', String(Math.min(at * dur, Math.max(0, dur - 0.2))), '-i', file, '-frames:v', '1', '-vf', 'scale=320:-2', '-q:v', '5', out],
+                { stdio: 'ignore' },
+              );
+              child.on('exit', () => {
+                try {
+                  resolve('data:image/jpeg;base64,' + fs.readFileSync(out).toString('base64'));
+                } catch {
+                  resolve(null);
+                } finally {
+                  fs.rmSync(out, { force: true });
+                }
+              });
+              child.on('error', () => resolve(null));
+            }),
+          ),
+        );
+        style.frames = frames.filter(Boolean);
+      } catch {
+        style.frames = [];
+      }
       return json(res, 200, { ...style, ms: Date.now() - started });
+    }
+
+    /* ------------------------------------------------ the simple editor -- */
+
+    if (req.method === 'POST' && url.pathname === '/api/editor/probe') {
+      const body = await readBody(req);
+      if (!body?.path || !fs.existsSync(body.path)) return json(res, 400, { error: 'فایل پیدا نشد.' });
+      const meta = await editorApi.probeMedia(body.path);
+      const dir = path.join(CONFIG_DIR, 'editor', crypto.randomBytes(4).toString('hex'));
+      const strip = await editorApi.filmstrip(body.path, { n: 10, dir });
+      const wave = meta.hasAudio ? await editorApi.peaks(body.path, { n: 600 }) : [];
+      return json(res, 200, {
+        ...meta,
+        strip: strip.map((f) => `/api/editor/media?file=${encodeURIComponent(f)}`),
+        peaks: wave,
+      });
+    }
+
+    if (req.method === 'POST' && url.pathname === '/api/editor/transcribe') {
+      const body = await readBody(req);
+      if (!body?.path || !fs.existsSync(body.path)) return json(res, 400, { error: 'فایل پیدا نشد.' });
+      const dir = path.join(CONFIG_DIR, 'editor', `asr-${crypto.randomBytes(3).toString('hex')}`);
+      const started = Date.now();
+      const segments = await editorApi.transcribeToSegments(body.path, {
+        model: body.model || 'small',
+        language: body.language || 'fa',
+        outDir: dir,
+        onLog: (line) => console.log(`[editor-asr] ${line}`),
+      });
+      return json(res, 200, { segments, ms: Date.now() - started });
+    }
+
+    if (req.method === 'POST' && url.pathname === '/api/editor/render') {
+      const body = await readBody(req);
+      const edl = body?.edl;
+      if (!edl?.base?.src || !fs.existsSync(edl.base.src)) return json(res, 400, { error: 'ویدیوی پایه پیدا نشد.' });
+      const id = `edit-${new Date().toISOString().slice(0, 18).replace(/[-:T]/g, '')}-${Math.random().toString(36).slice(2, 6)}`;
+      const p = jobs.paths(id);
+      fs.mkdirSync(p.root, { recursive: true });
+      const job = {
+        id,
+        createdAt: new Date().toISOString(),
+        status: 'running',
+        engine: 'editor',
+        name: body.name || 'edit',
+        progress: { pct: 5, stage: 'render', label: 'ادیت در حال رندر' },
+        output: null,
+        error: null,
+      };
+      jobs.save(job);
+      editorApi
+        .render(edl, {
+          jobDir: p.root,
+          power: body.power || 50,
+          onLog: (line) => jobs.appendLog(id, 'info', line),
+        })
+        .then((output) => {
+          jobs.setStatus(id, 'succeeded', { output, finishedAt: new Date().toISOString() });
+          jobs.setProgress(id, 'verify', { sub: 1 });
+        })
+        .catch((err) => {
+          jobs.setStatus(id, 'failed', { error: String(err.message).slice(0, 300), finishedAt: new Date().toISOString() });
+          jobs.appendLog(id, 'error', String(err.message).slice(0, 300));
+        });
+      return json(res, 202, job);
+    }
+
+    if (req.method === 'GET' && url.pathname === '/api/editor/media') {
+      /* editor scratch files: uploads and filmstrip frames only — the config
+       * file (which can hold an API key) is deliberately out of reach */
+      const file = (url.searchParams.get('file') || '').replace(/\\/g, '/');
+      if (!/^(uploads|editor)\//.test(file)) return json(res, 403, { error: 'خارج از محدوده' });
+      return sendFile(req, res, path.join(CONFIG_DIR, file), { root: CONFIG_DIR });
+    }
+
+    if (req.method === 'GET' && url.pathname === '/api/editor/result') {
+      const id = url.searchParams.get('id') || '';
+      const p = jobs.paths(id);
+      const file = path.join(p.out, 'edit.mp4');
+      if (!fs.existsSync(file)) return json(res, 404, { error: 'خروجی هنوز ساخته نشده' });
+      return sendFile(req, res, file, { root: p.out, download: `edit-${id}.mp4` });
+    }
+
+    if (req.method === 'GET' && url.pathname === '/api/editor/fonts') {
+      const families = [];
+      const store = path.join(CONFIG_DIR, '..', 'assets', 'store');
+      const vazir = path.join(STUDIO_ROOT, 'assets', 'store', 'font-vazirmatn-ttf');
+      const jb = path.join(STUDIO_ROOT, 'assets', 'store', 'font-jetbrains-mono');
+      void vazir; void jb; void store;
+      if (fs.existsSync(path.join(packDir(packById('font-vazirmatn-ttf')), 'Vazirmatn-Regular.ttf')))
+        families.push({ family: 'Vazirmatn', weights: [400, 500, 700, 800], source: 'store' });
+      if (fs.existsSync(path.join(packDir(packById('font-jetbrains-mono')), 'JetBrainsMono-Regular.ttf')))
+        families.push({ family: 'JetBrains Mono', weights: [400, 700], source: 'store' });
+      families.push({ family: 'System', weights: [400, 700], source: 'system' });
+      return json(res, 200, { families });
     }
 
     // Local file picker: the panel reads paths instead of uploading 4 GB.

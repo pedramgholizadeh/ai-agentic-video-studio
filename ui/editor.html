@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ادیتور ویدیو — استودیوی ویدیو</title>
+  <link rel="stylesheet" href="app.css" />
+  <link rel="stylesheet" href="assets/fonts/vazirmatn.css" />
+  <script src="i18n.js"></script>
+  <script src="engine.js"></script>
+  <style>
+    .ed-main { display: grid; grid-template-columns: 1fr 340px; gap: var(--s4); max-width: 1500px; margin: 0 auto; padding: var(--s5) clamp(16px, 3vw, 36px) 40px; }
+    @media (max-width: 1100px) { .ed-main { grid-template-columns: 1fr; } }
+
+    .ed-card { background: var(--panel); border: 1px solid var(--hairline); border-radius: var(--r-md); padding: var(--s4); }
+    .ed-card h3 { font-size: 14px; font-weight: 700; margin-bottom: var(--s3); display: flex; align-items: center; gap: 8px; }
+    .ed-card h3 .n { width: 20px; height: 20px; display: grid; place-items: center; border-radius: 50%; background: var(--accent-dim); color: var(--accent); font-size: 11px; }
+
+    /* preview */
+    .ed-stage { position: relative; background: #000; border-radius: var(--r-sm); overflow: hidden; aspect-ratio: 16 / 9; }
+    .ed-stage video, .ed-stage img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #000; }
+    .ed-stage .ov { position: absolute; border: 1px dashed rgba(85, 230, 165, 0.55); display: none; }
+    .ed-stage .ov.on { display: block; }
+    .ed-stage .ov video { object-fit: fill; }
+    .ed-sub { position: absolute; left: 0; right: 0; text-align: center; pointer-events: none;
+      font-family: var(--font-fa); line-height: 1.6; text-shadow: 0 2px 6px rgba(0,0,0,.85), 0 0 3px rgba(0,0,0,.9);
+      white-space: pre-wrap; }
+
+    /* timeline */
+    .tl { margin-top: var(--s3); user-select: none; }
+    .tl-time { display: flex; justify-content: space-between; color: var(--faint); font-size: 11px; font-variant-numeric: tabular-nums; direction: ltr; }
+    .tl-lane { position: relative; height: 64px; background: var(--well); border: 1px solid var(--hairline); border-radius: var(--r-sm); overflow: hidden; cursor: crosshair; }
+    .tl-lane + .tl-lane { margin-top: 6px; }
+    .tl-lane canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+    .tl-seg { position: absolute; top: 4px; bottom: 4px; background: linear-gradient(180deg, rgba(85,230,165,0.32), rgba(47,184,126,0.22));
+      border: 1px solid var(--accent-line); border-radius: 6px; cursor: grab; overflow: hidden; }
+    .tl-seg.sel { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(85,230,165,0.3); }
+    .tl-seg.ov-seg { background: linear-gradient(180deg, rgba(240,191,116,0.3), rgba(240,143,116,0.18)); border-color: rgba(240,191,116,0.5); }
+    .tl-seg .h { position: absolute; top: 0; bottom: 0; width: 8px; cursor: ew-resize; background: rgba(255,255,255,0.14); }
+    .tl-seg .h.in { inset-inline-start: 0; border-radius: 6px 0 0 6px; }
+    .tl-seg .h.out { inset-inline-end: 0; border-radius: 0 6px 6px 0; }
+    .tl-head { position: absolute; top: 0; bottom: 0; width: 2px; background: #fff; pointer-events: none; box-shadow: 0 0 6px rgba(255,255,255,0.7); }
+    .tl-strip { position: absolute; inset: 0; display: flex; }
+    .tl-strip img { width: calc(100% / 10); height: 100%; object-fit: cover; opacity: 0.85; }
+    .tl-label { position: absolute; inset-inline-start: 8px; top: 4px; font-size: 10.5px; color: var(--faint); pointer-events: none; z-index: 2; }
+
+    .ed-tools { display: flex; gap: var(--s2); flex-wrap: wrap; margin-top: var(--s3); }
+    .ed-tools .ghost { min-height: 38px; }
+    .ed-field { display: grid; gap: 5px; font-size: 12px; color: var(--muted); margin-bottom: var(--s3); }
+    .ed-field .row { display: flex; gap: var(--s2); align-items: center; }
+    .ed-field input[type="range"] { accent-color: var(--accent); }
+    .ed-sub-list { max-height: 300px; overflow: auto; display: grid; gap: 6px; }
+    .ed-sub-row { display: grid; grid-template-columns: auto 1fr; gap: 8px; align-items: start; }
+    .ed-sub-row .t { color: var(--faint); font-size: 11px; font-variant-numeric: tabular-nums; padding-top: 8px; white-space: nowrap; direction: ltr; }
+    .ed-sub-row textarea { min-height: 0; min-width: 0; padding: 7px 10px; font-size: 12.5px; }
+    .ed-status { color: var(--muted); font-size: 12.5px; margin-top: var(--s3); min-height: 18px; }
+    .ed-status.bad { color: var(--bad); }
+    .ed-result { margin-top: var(--s3); }
+    .ed-result a { color: var(--accent); }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <header class="port-topbar">
+    <span class="t">ادیتور ویدیو</span>
+    <a class="back" href="/">بازگشت به پنل</a>
+    <a class="back" href="assets.html">assetها</a>
+    <button type="button" class="ghost" id="langBtn" data-no-i18n>English</button>
+  </header>
+
+  <main class="ed-main">
+    <div class="ed-left">
+      <div class="ed-card">
+        <h3><span class="n">۱</span> پیش‌نمایش</h3>
+        <div class="ed-stage" id="stage">
+          <video id="pvBase" playsinline crossorigin="anonymous"></video>
+          <div id="pvOverlays"></div>
+          <div class="ed-sub" id="pvSub"></div>
+        </div>
+
+        <div class="tl">
+          <div class="tl-time"><span id="tlCur">0.00</span><span id="tlDur">0.00</span></div>
+          <div class="tl-lane" id="laneBase">
+            <span class="tl-label">ویدیوی پایه — کلیک: جابه‌جایی، «کات»: برش در هد</span>
+            <div class="tl-strip" id="tlStrip"></div>
+            <canvas id="tlWave"></canvas>
+            <div id="tlSegs"></div>
+            <div class="tl-head" id="tlHead" style="inset-inline-start: 0"></div>
+          </div>
+          <div class="tl-lane" id="laneOv" style="height: 34px">
+            <span class="tl-label">اورلی‌ها — بکش و رها کن</span>
+            <div id="tlOvSegs"></div>
+          </div>
+        </div>
+
+        <div class="ed-tools">
+          <button type="button" class="ghost" id="btnSplit">✂ کات در هد</button>
+          <button type="button" class="ghost" id="btnDelSeg">حذف قطعهٔ انتخابی</button>
+          <button type="button" class="ghost" id="btnAddOv">+ ویدیوی اورلی</button>
+          <button type="button" class="ghost" id="btnPlay">▶ پخش</button>
+        </div>
+        <input type="file" id="fileOv" accept="video/*" class="hidden" />
+        <div class="ed-status" id="edStatus"></div>
+      </div>
+
+      <div class="ed-card" style="margin-top: var(--s4)">
+        <h3><span class="n">۳</span> زیرنویس خودکار</h3>
+        <div class="ed-field">
+          <div class="row">
+            <button type="button" class="ghost" id="btnTranscribe">ساخت زیرنویس از صدا</button>
+            <span class="tiny" id="asrState"></span>
+          </div>
+        </div>
+        <div class="ed-field">
+          <div class="row">
+            <span>قلم:</span>
+            <select id="subFont" style="max-width: 180px"></select>
+            <span>وزن:</span>
+            <select id="subWeight" style="max-width: 110px">
+              <option value="400">معمولی</option>
+              <option value="700" selected>ضخیم</option>
+              <option value="800">سیاه</option>
+            </select>
+          </div>
+          <div class="row">
+            <span>اندازه:</span>
+            <input type="range" id="subSize" min="30" max="120" value="56" style="flex:1" />
+            <span>جای:</span>
+            <select id="subPlace" style="max-width: 120px">
+              <option value="bottom" selected>پایین</option>
+              <option value="middle">میانه</option>
+              <option value="top">بالا</option>
+            </select>
+          </div>
+          <div class="row">
+            <span>فاصله از لبه:</span>
+            <input type="range" id="subMargin" min="2" max="30" value="8" style="flex:1" />
+            <span>رنگ:</span>
+            <input type="color" id="subColor" value="#ffffff" style="width: 44px; padding: 2px" />
+          </div>
+        </div>
+        <div class="ed-sub-list" id="subList"></div>
+      </div>
+    </div>
+
+    <div class="ed-right">
+      <div class="ed-card">
+        <h3><span class="n">۲</span> ویدیوی پایه</h3>
+        <button type="button" class="pick" id="btnPickBase">انتخاب ویدیوی پایه از دیسک</button>
+        <input type="file" id="fileBase" accept="video/*" class="hidden" />
+        <p class="tiny" id="baseMeta" style="margin-top: 8px; color: var(--faint)"></p>
+      </div>
+
+      <div class="ed-card" style="margin-top: var(--s4)">
+        <h3><span class="n">۳</span> تنظیم قطعهٔ انتخابی</h3>
+        <div id="inspector" class="tiny" style="color: var(--faint)">قطعه‌ای انتخاب نشده — روی نوار تایملاین کلیک کن.</div>
+      </div>
+
+      <div class="ed-card" style="margin-top: var(--s4)">
+        <h3><span class="n">۴</span> خروجی</h3>
+        <div class="ed-field">
+          <span>کیفیت</span>
+          <select id="outQuality">
+            <option value="draft">پیش‌نویس (سریع)</option>
+            <option value="delivery" selected>تحویلی (باکیفیت‌ترین)</option>
+          </select>
+        </div>
+        <div class="ed-field">
+          <span>سقف حجم (مگابایت)</span>
+          <input type="number" id="outMaxMb" value="200" min="10" max="200" />
+        </div>
+        <button type="button" class="primary" id="btnExport" style="width: 100%">رندر خروجی</button>
+        <div class="ed-status" id="exStatus"></div>
+        <div class="ed-result hidden" id="exResult"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="app-ed.js"></script>
+</body>
+</html>

@@ -94,6 +94,15 @@ right-to-left.
    an OpenAI-compatible model for edit direction, or a code agent via the
    queue.
 
+### Learning from a reference video
+
+Drop a reference video in step 1 and the studio **measures** it — cuts,
+motion energy, audio rhythm, palette — and shows what it learned as a style
+profile: sample frames from the reference, an energy gauge, the learned card
+cadence, and the suggested density with a one-click *apply* button. No frame
+is ever copied; the numbers drive the beat engine so your film moves *like*
+the reference.
+
 ## Using it from a code agent
 
 Set *Direction → کار را چه کسی انجام دهد؟* to the agent mode (or send
@@ -137,6 +146,28 @@ tool-specific vocabulary.
 | When compositing by hand, put `-c:v libvpx-vp9` **before** the layer's `-i` | ffmpeg's native VP9 decoder silently discards the alpha plane and the layer drops black over the video |
 | Never pass `--max-bitrate` to a WebM render | it is MP4-only and breaks the VP9/alpha mux |
 | Never run `fit-size` on an alpha layer | its only encoder is libx264/`yuv420p`, which flattens the alpha; to shrink: `node scripts/motion.mjs slim --file <layer> --out <layer> --crf 30` |
+
+## The simple video editor
+
+Separate from the wizard, the panel ships a small editor at
+[`editor.html`](https://pedramgholizadeh.github.io/ai-agentic-video-studio/editor.html)
+(linked from the top bar):
+
+- **Timeline** with a filmstrip, an audio waveform and a playhead; **cut**
+  splits a clip at the playhead, edges trim, segments delete.
+- **Overlays**: stack one or more videos over the base with position, scale
+  and opacity — dragged directly on the timeline.
+- **Auto subtitles**: the editor transcribes the base video's audio (Whisper),
+  shows every segment as editable text (fix recognition mistakes in place),
+  and burns them in with your **font** (Vazirmatn / JetBrains Mono), size,
+  weight, colour, outline and **position** (bottom / middle / top + margin).
+- **Export** with the same power and size governance as every render:
+  H.264 quality presets, and an automatic re-encode loop that keeps the
+  output under your MB budget.
+
+Subtitles burn through the studio's own renderer as a transparent WebM layer
+(libass is used when the machine's ffmpeg ships it), so Persian shaping is
+correct everywhere. Everything renders locally; nothing is uploaded.
 
 ## The asset store
 

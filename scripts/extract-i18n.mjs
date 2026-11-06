@@ -21,7 +21,7 @@ const HAS_FA = /[؀-ۿ]/;
  * which is exactly the granularity the runtime translator has to match. */
 const TEXT_RUN = /[^"'`;{}()<>|$\\&=+*/\n\r]+/g;
 
-const UI_FILES = ['ui/index.html', 'ui/app.js', 'ui/engine.js', 'ui/port.html', 'ui/assets.html'];
+const UI_FILES = ['ui/index.html', 'ui/app.js', 'ui/engine.js', 'ui/port.html', 'ui/assets.html', 'ui/editor.html', 'ui/app-ed.js'];
 const ENGINE_FILES = ['server.mjs', 'cli.mjs'];
 /* These files speak Persian *about data*, not about the interface: the filler
  * word list that keeps a card from reading like a slogan, the Persian→icon

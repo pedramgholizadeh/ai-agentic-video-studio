@@ -570,16 +570,45 @@ async function analyzeStyle(info) {
 function paintStyle(style) {
   const d = style.derived || {};
   const densityFa = (S.manifest?.densities || []).find((x) => x.id === d.density)?.fa || d.density;
-  const chips = [
-    d.beatLen ? `هر ${fa(d.beatLen)} ثانیه یک کارت` : null,
-    d.energy != null ? `انرژی ${fa(Math.round(d.energy * 100))}٪` : null,
-    densityFa ? `چگالی ${densityFa}` : null,
-    d.look || null,
-    (style.analysisWindow ? `پنجرهٔ تحلیل ${fa(Math.round(style.analysisWindow))} ثانیه` : null),
-  ].filter(Boolean);
-  $('#styleRead').innerHTML =
-    chips.map((c) => `<span class="pill">${esc(c)}</span>`).join('') +
-    (style.notes?.length ? `<p class="tiny">یادداشت: ${esc(style.notes.join('، '))}</p>` : '');
+  const energy = Math.round((d.energy ?? 0) * 100);
+  const frames = (style.frames || [])
+    .map((f) => `<img class="st-frame" src="${f}" alt="" />`)
+    .join('');
+  /* rhythm strip: the learned cadence drawn as ticks across one stretch */
+  const beatLen = d.beatLen || 2;
+  const ticks = Array.from({ length: 14 }, (_, i) => `<i style="opacity:${i % 4 === 0 ? 0.9 : 0.4}"></i>`).join('');
+  $('#styleRead').innerHTML = `
+    ${frames ? `<div class="st-frames">${frames}<span class="st-frames-cap">فریم‌های نمونه از رفرنس</span></div>` : ''}
+    <div class="st-gauges">
+      <div class="st-gauge">
+        <span class="st-glabel">انرژی</span>
+        <span class="st-gbar"><i style="width:${energy}%"></i></span>
+        <span class="st-gval">${fa(energy)}٪</span>
+      </div>
+      <div class="st-gauge">
+        <span class="st-glabel">ریتم</span>
+        <span class="st-strip">${ticks}</span>
+        <span class="st-gval">${d.beatLen ? `هر ${fa(Math.round(beatLen * 10) / 10)} ثانیه` : '—'}</span>
+      </div>
+    </div>
+    <div class="st-chips">
+      <span class="pill">چگالی پیشنهادی: ${esc(densityFa)}</span>
+      ${d.look ? `<span class="pill">${esc(d.look)}</span>` : ''}
+      ${style.meta ? `<span class="pill">${esc(style.meta.ratio || '')} · ${fa(Math.round(style.meta.duration || 0))} ثانیه</span>` : ''}
+    </div>
+    ${
+      d.density && d.density !== S.motion.density
+        ? `<button type="button" class="ghost st-apply" id="applyDensity">اعمال چگالی «${esc(densityFa)}» روی کار</button>`
+        : ''
+    }
+    ${style.notes?.length ? `<p class="tiny">یادداشت: ${esc(style.notes.join('، '))}</p>` : ''}`;
+  const apply = document.getElementById('applyDensity');
+  if (apply)
+    apply.onclick = () => {
+      S.motion.density = d.density;
+      flash(`چگالی روی «${densityFa}» قفل شد — از رفرنس آموخته شد.`);
+      paintStyle(S.style);
+    };
 }
 
 function wireSources() {
