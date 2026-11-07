@@ -1351,3 +1351,26 @@ pre.wake { background: var(--well); border: 1px solid var(--hairline); border-ra
 .steps li div small { display: block; }
 /* settings cards: two comfortable columns, four cramped ones */
 #settings-view .cards.two { grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); }
+
+/* ── UX pass: transcript table, wake copy, model downloads ── */
+/* transcript rows: index number + a real 44px-class input target */
+.tr-row .t b {
+  display: block; font-family: var(--font); font-size: 11px; color: var(--accent);
+  font-weight: 700; margin-bottom: 2px;
+}
+.tr-row input { padding: 10px 2px; min-height: 44px; }
+.tr-row { transition: background var(--dur); }
+/* the load-failure state is a direction, not a dead end */
+.tr-error { display: grid; gap: var(--s2); justify-items: start; padding: var(--s4); color: var(--muted); font-size: 13.5px; }
+.tr-error b { color: var(--warn); }
+/* wake command + its copy button sit on one row */
+.wake-row { display: flex; gap: var(--s2); align-items: stretch; }
+.wake-row .wake { flex: 1; margin: 0; cursor: copy; }
+.wake-row .wake:hover { border-color: var(--accent-line); }
+/* the model list in settings */
+.wmodel-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); border-bottom: 1px dashed var(--hairline); padding: var(--s2) 0; }
+.wmodel-row:last-child { border-bottom: 0; }
+.wmodel-row .slider-row { flex: 1; margin: 0; }
+.wmodel-row small { color: var(--faint); font-size: 11.5px; }
+.wmodel-row small.miss { color: var(--warn); }
+.wake-panel { border-color: var(--warn); }

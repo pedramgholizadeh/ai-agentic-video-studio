@@ -322,7 +322,23 @@
   "در صف ایجنت است — منتظر برداشته‌شدن": "queued for the agent — waiting to be claimed",
   "· فارسی": "· Persian",
   "اکسنت باید مثل #55e6a5 باشد": "the accent must look like #55e6a5",
-  "مسیر اصلی این رفرنس ثبت نشده بود — فایلش را دوباره انتخاب کن.": "the original path of this reference was not recorded — pick the file again."
+  "مسیر اصلی این رفرنس ثبت نشده بود — فایلش را دوباره انتخاب کن.": "the original path of this reference was not recorded — pick the file again.",
+  "کپی شد ✓": "copied ✓",
+  "دستور wake کپی شد ✓": "wake command copied ✓",
+  "ترنسکریپت خوانده نشد.": "The transcript could not be read.",
+  "تلاش دوباره": "Retry",
+  "جدول ترنسکریپت خالی است — اول «تلاش دوباره» را بزن": "The transcript table is empty — hit “Retry” first",
+  "در حال ذخیره…": "saving…",
+  "این جاب در صف ایجنته": "This job is queued for the agent",
+  "این دستور را در ترمینال (از ریشهٔ ریپو) اجرا کن تا ایجنت جاب را بردارد:": "Run this in your terminal (from the repo root) so the agent picks the job up:",
+  "کپی": "Copy",
+  "دانلود": "Download",
+  "در حال دانلود…": "downloading…",
+  "دانلود مدل تمام شد ✓": "model download finished ✓",
+  "شروع شد — تا تمام شدن همین‌جا می‌ماند": "started — stay here until it lands",
+  "این دستور را در ترمینال": "Run this in your terminal",
+  "از ریشهٔ ریپو": "from the repo root",
+  "اجرا کن تا ایجنت جاب را بردارد:": "so the agent picks the job up:"
 };
 
   /* Word-level table for interpolated text. Deliberately small and specific:

@@ -24,6 +24,7 @@
     jobId: localStorage['studio.lastJob'] || null,
     es: null,
     trCues: [],
+    trDirty: false,
     lastGate: null,
   };
 
@@ -40,6 +41,29 @@
     const s = Math.max(0, Math.round(t || 0));
     return `${String(Math.floor(s / 3600)).padStart(2, '0')}:${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
   };
+  /** Assign a media source only when it actually changed — the SSE tick would
+   * otherwise reload the player every 700 ms and wreck seeking. */
+  function setSrc(el, src) {
+    if (!el || el.dataset.src === src) return;
+    el.dataset.src = src;
+    el.src = src;
+  }
+  /** Copy text to the clipboard with visible feedback. */
+  async function copyText(text, okMsg = 'کپی شد ✓') {
+    try {
+      await navigator.clipboard.writeText(text);
+      toast(okMsg);
+    } catch {
+      // clipboard needs a focused document; fall back to a selection
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.append(ta);
+      ta.select();
+      document.execCommand('copy');
+      ta.remove();
+      toast(okMsg);
+    }
+  }
 
   async function api(path, { method = 'GET', body } = {}) {
     const res = await fetch(ENGINE.url(path), {
@@ -390,12 +414,14 @@
       if (started.queued) {
         const info = $('#queueInfo');
         info.hidden = false;
+        const wakeText = started.spawned ? `tail -f workspace/jobs/${job.id}/agent-out.txt` : started.wake;
         info.innerHTML = `
           <div class="panel">
             <h3>در صف ایجنت</h3>
             <p>${started.spawned ? `ایجنت headless اجرا شد (pid ${fa(started.spawned.pid)}) — همین‌جا پیشرفتش را می‌بینی.` : 'ایجنت نصب نیست یا اسپاون نشد — این دستور را در ترمینال اجرا کن:'}</p>
-            <pre class="wake">${esc(started.spawned ? `tail -f ${job.id}/agent-out.txt` : started.wake)}</pre>
+            <div class="wake-row"><pre class="wake">${esc(wakeText)}</pre><button class="ghost tiny wake-copy">کپی</button></div>
           </div>`;
+        info.querySelector('.wake-copy').addEventListener('click', () => copyText(wakeText, 'دستور wake کپی شد ✓'));
       }
       toast('جاب شروع شد');
       openJob(job.id, { switch: true });
@@ -443,7 +469,8 @@
 
   function paintStatus(j) {
     const el = $('#bv-status');
-    const cls = j.status === 'running' ? 'running' : j.status === 'review' ? 'queued' : j.status === 'succeeded' ? 'done' : j.status === 'failed' ? 'failed' : 'queued';
+    // class names follow the stylesheet (.status.succeeded / .status.queued / …)
+    const cls = { running: 'running', review: 'queued', queued: 'queued', succeeded: 'succeeded', failed: 'failed', cancelled: 'failed', draft: 'queued' }[j.status] || 'queued';
     el.className = `status ${cls}`;
     const labels = { running: 'در حال ساخت', review: 'منتظر بازبینی تو', queued: 'در صف ایجنت', succeeded: 'آماده', failed: 'خطا', cancelled: 'لغو شد', draft: 'ساخته نشده' };
     el.innerHTML = `<i></i>${labels[j.status] || j.status}`;
@@ -470,11 +497,24 @@
     $('#gate-transcript').hidden = gate !== 'transcript';
     $('#gate-preview').hidden = gate !== 'preview';
     $('#understandCards').hidden = !(j.approved?.transcript && j.progress?.pct >= 18 && !gate && j.status !== 'draft');
+    // a queued agent job shows its wake command, copyable, right on the job page
+    const queuedBox = $('#agentWake');
+    if (j.status === 'queued' && j.config?.engine?.mode === 'agent') {
+      queuedBox.hidden = false;
+      const wake = `node cli.mjs claim ${j.id} --by ${j.config.engine.agent || 'agent'}`;
+      queuedBox.querySelector('code').textContent = wake;
+      const btn = queuedBox.querySelector('.wake-copy');
+      if (!btn.dataset.wired) {
+        btn.dataset.wired = '1';
+        btn.addEventListener('click', () => copyText(queuedBox.querySelector('code').textContent, 'دستور wake کپی شد ✓'));
+      }
+    } else queuedBox.hidden = true;
+    // video sources only ever change when the gate itself changes — never per tick
     if (j.status === 'review' && gate === 'transcript') {
-      $('#trVideo').src = ENGINE.url(`/api/jobs/${j.id}/source`);
+      setSrc($('#trVideo'), ENGINE.url(`/api/jobs/${j.id}/source`));
     }
     if (gate === 'preview') {
-      $('#pvVideo').src = ENGINE.url(`/api/jobs/${j.id}/preview?t=${Date.now()}`);
+      setSrc($('#pvVideo'), ENGINE.url(`/api/jobs/${j.id}/preview?v=${j.gate?.at || ''}`));
       $('#pvVideo').style.setProperty('--ar', (j.config?.output?.ratio || '16:9').replace(':', '/'));
     }
   }
@@ -482,12 +522,20 @@
   /* ------- transcript gate */
 
   async function loadTranscript() {
+    const box = $('#trTable');
     try {
       const { cues } = await api(`/api/jobs/${S.jobId}/transcript`);
       S.trCues = cues;
+      S.trDirty = false;
       paintTranscript();
+      $('#trSave').disabled = true;
     } catch (err) {
-      $('#trTable').innerHTML = `<p class="hint">${esc(err.message)}</p>`;
+      // a failed load must never leave an empty editable table behind: show
+      // what happened and how to get out of it
+      S.trCues = [];
+      box.innerHTML = `<div class="tr-error"><b>ترنسکریپت خوانده نشد.</b><span>${esc(err.message)}</span><button class="ghost" id="trRetry">تلاش دوباره</button></div>`;
+      $('#trRetry').addEventListener('click', loadTranscript);
+      $('#trSave').disabled = true;
     }
   }
 
@@ -496,8 +544,8 @@
       .map(
         (c, i) => `
       <div class="tr-row" data-i="${i}">
-        <span class="t" data-seek="${c.start}">${esc(hhmmss(c.start))} → ${esc(hhmmss(c.end))}</span>
-        <input value="${esc(c.text)}" data-i="${i}">
+        <span class="t" data-seek="${c.start}"><b>${fa(i + 1)}</b>${esc(hhmmss(c.start))} → ${esc(hhmmss(c.end))}</span>
+        <input value="${esc(c.text)}" data-i="${i}" spellcheck="false">
       </div>`,
       )
       .join('');
@@ -511,22 +559,38 @@
     $$('#trTable input').forEach((inp) =>
       inp.addEventListener('input', () => {
         S.trCues[Number(inp.dataset.i)].text = inp.value;
+        S.trDirty = true;
+        $('#trSave').disabled = false;
       }),
     );
   }
 
-  async function saveTranscript() {
+  async function saveTranscript({ silent = false } = {}) {
+    if (!S.trCues.length) {
+      // an empty table is a load failure, not an edit — say so and offer the way back
+      toast('جدول ترنسکریپت خالی است — اول «تلاش دوباره» را بزن', 'bad');
+      return false;
+    }
+    const btn = $('#trSave');
+    btn.disabled = true;
+    btn.textContent = 'در حال ذخیره…';
     try {
       await api(`/api/jobs/${S.jobId}/transcript`, { method: 'PUT', body: { cues: S.trCues } });
-      toast('اصلاحات ذخیره شد ✓');
+      S.trDirty = false;
+      if (!silent) toast('اصلاحات ذخیره شد ✓');
+      return true;
     } catch (err) {
       toast(err.message, 'bad');
+      return false;
+    } finally {
+      btn.textContent = 'ذخیرهٔ اصلاحات';
+      btn.disabled = !S.trDirty;
     }
   }
 
   async function approve(gate) {
     try {
-      if (gate === 'transcript' && S.trCues.length) await saveTranscript();
+      if (gate === 'transcript' && S.trCues.length && !(await saveTranscript({ silent: true }))) return;
       await api(`/api/jobs/${S.jobId}/approve`, { method: 'POST', body: { gate } });
       toast(gate === 'transcript' ? 'ترنسکریپت تایید شد — ادامه می‌دهد' : 'تایید شد — خروجی نهایی می‌سازد');
       await refreshJob();
@@ -555,13 +619,19 @@
 
   async function sendChat(text) {
     if (!text.trim()) return;
+    const btn = $('#chatForm button');
+    const input = $('#chatInput');
+    btn.disabled = true;
     try {
       await api(`/api/jobs/${S.jobId}/chat`, { method: 'POST', body: { text } });
-      $('#chatInput').value = '';
+      input.value = '';
       await loadChat();
       await refreshJob();
     } catch (err) {
       toast(err.message, 'bad');
+    } finally {
+      btn.disabled = false;
+      input.focus();
     }
   }
 
@@ -732,20 +802,18 @@
     );
   }
 
-  async function loadSettings() {
-    S.cfg = await api('/api/config');
-    const pct = S.cfg.cpu?.pct ?? 50;
-    $('#cpuSlider').value = pct;
-    $('#cpuPct').textContent = `${fa(pct)}٪`;
-    await paintCpuDetail(pct);
-    // whisper models
+  /** The transcription card: default-model radio + in-place downloads. */
+  async function paintWhisperSettings() {
     try {
-      const w = await api('/api/whisper');
-      $('#whisperBox').innerHTML = w.models
+      S.whisper = await api('/api/whisper');
+      $('#whisperBox').innerHTML = S.whisper.models
         .map(
           (m) => `
-        <label class="slider-row"><input type="radio" name="wmodel" value="${m.id}" ${w.default === m.id ? 'checked' : ''}>
-          <span>${m.id}${m.present ? '' : ' — دانلود نشده (npm run models)'}</span></label>`,
+        <div class="wmodel-row">
+          <label class="slider-row"><input type="radio" name="wmodel" value="${m.id}" ${S.whisper.default === m.id ? 'checked' : ''}>
+            <span>${m.id} ${m.present ? `<small>${esc(mb(m.size))}</small>` : '<small class="miss">— دانلود نشده</small>'}</span></label>
+          ${m.present ? '' : `<button class="ghost tiny wdl" data-m="${m.id}" ${S.whisper.downloading?.includes(m.id) ? 'disabled' : ''}>${S.whisper.downloading?.includes(m.id) ? 'در حال دانلود…' : 'دانلود'}</button>`}
+        </div>`,
         )
         .join('');
       $$('#whisperBox input').forEach((r) =>
@@ -754,9 +822,56 @@
           toast(`مدل پیش‌فرض ${r.value} شد`);
         }),
       );
+      $$('#whisperBox .wdl').forEach((b) =>
+        b.addEventListener('click', async () => {
+          const m = b.dataset.m;
+          b.disabled = true;
+          b.textContent = 'در حال دانلود…';
+          try {
+            await api('/api/whisper/download', { method: 'POST', body: { model: m } });
+            toast(`دانلود ${m} شروع شد — تا تمام شدن همین‌جا می‌ماند`);
+            pollWhisper();
+          } catch (err) {
+            toast(err.message, 'bad');
+            b.disabled = false;
+            b.textContent = 'دانلود';
+          }
+        }),
+      );
     } catch {
       $('#whisperBox').innerHTML = '<p class="hint">—</p>';
     }
+  }
+
+  /** While a model download is live, refresh its card until it lands. */
+  let whisperPolling = false;
+  async function pollWhisper() {
+    if (whisperPolling) return;
+    whisperPolling = true;
+    let wasDownloading = true;
+    while (wasDownloading) {
+      await new Promise((r) => setTimeout(r, 4000));
+      try {
+        const w = await api('/api/whisper');
+        S.whisper = w;
+        wasDownloading = (w.downloading || []).length > 0;
+        if (S.view === 'settings') await paintWhisperSettings();
+      } catch {
+        break;
+      }
+    }
+    whisperPolling = false;
+    toast('دانلود مدل تمام شد ✓');
+  }
+
+  async function loadSettings() {
+    S.cfg = await api('/api/config');
+    const pct = S.cfg.cpu?.pct ?? 50;
+    $('#cpuSlider').value = pct;
+    $('#cpuPct').textContent = `${fa(pct)}٪`;
+    await paintCpuDetail(pct);
+    // whisper models — pick the default, download the missing ones in place
+    await paintWhisperSettings();
     // brand
     try {
       const brand = await api('/api/brand');
