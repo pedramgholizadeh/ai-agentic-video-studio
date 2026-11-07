@@ -5,6 +5,45 @@ The format follows [keep-a-changelog](https://keepachangelog.com/en/1.1.0/);
 the project does not track dates before 1.0.0 — it grew inside a private
 working repository and this is its first public form.
 
+## [2.0.0] — 2026-11-07
+
+### The studio becomes a re-edit studio
+
+- **Two inputs, one film**: every job takes the user's video plus a reference
+  video and delivers the user's footage re-edited in the reference's style —
+  word-synced Persian subtitles (Vazirmatn), motion accents, sound design and
+  the composite done for them at 30 fps in 1920×1080 (default) or 1080×1920.
+- **The pipeline** `prepare → transcribe → review → understand → reference →
+  assets → strategy → scaffold → preview → final → verify`, driven by
+  `lib/runner.mjs` in studio/provider mode and by `HANDOFF.md` in agent mode,
+  with `lib/agent.mjs` writing the new contract.
+- **Accurate transcription**: whisper `large-v3` (offline, checksum-pinned) as
+  the default model; the transcript review gate shows every cue as an editable
+  row with click-to-seek video, saved back through the SRT.
+- **The reference memory** (`lib/references.mjs`): each reference video is
+  analysed once, keyed by content SHA-1 under `workspace/references/` with its
+  style profile and sample frames; the panel suggests previously analysed
+  references at input time and replays profiles instantly.
+- **The preview gate + chat edits** (`lib/chat.mjs`): a cheap 15 fps, 640 px
+  demo, a Persian chat box whose recognised intents (density, energy, pacing,
+  accent colour, caption side, SFX level, ratio, numbered transcript fixes)
+  patch the job and invalidate only the downstream artifacts, then re-render.
+- **Stage zero** (`lib/agents.mjs`): the user picks who edits — opencode /
+  zcode / claude code / codex (auto-spawned headless when installed, a wake
+  command otherwise) or an API brain (openrouter / z.ai / paasta.cloud) or the
+  deterministic house engine.
+- **The panel, rebuilt in the same design language**: five views (new job,
+  live job, jobs, reference memory, settings), SSE-driven progress and log,
+  Persian default with full English coverage of the chrome
+  (`npm run i18n:check`), and a settings view holding the CPU power dial
+  (default 50 %), the whisper model and provider keys.
+- **The final cut** (`lib/finalcut.mjs`): base footage + alpha layer + SFX bed
+  (+ logo) composited to H.264 with a CRF size guard; `motion.mjs final` gives
+  the same step to agents; verify demands the exact canvas, 30 fps and the
+  size budget.
+- The previous motion-overlay studio moved intact to [`old/`](old/) and still
+  runs from there (`node old/server.mjs`).
+
 ## [1.0.0] — 2026-11-06
 
 ### Added

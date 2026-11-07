@@ -23,11 +23,12 @@ engine is Node stdlib + ffmpeg + HyperFrames via npx.
 node --check server.mjs && node --check cli.mjs
 for f in lib/*.mjs scripts/*.mjs engine/*.mjs ui/app.js ui/engine.js; do node --check "$f"; done
 npm run doctor
-npm run i18n:check   # must report 0 phrases not covered
+npm run i18n:check   # panel chrome (ui/* sources) must report 0 gaps
 ```
 
-`i18n:check` failing means you introduced user-visible Persian that the
-dictionaries do not translate — see *UI copy* below.
+`i18n:check` also counts the Persian strings the engine prints into the job
+log; those may stay word-covered, but anything sourced from `ui/` — the panel
+chrome — must be fully covered before you commit. See *UI copy* below.
 
 ## The `npm run` table
 

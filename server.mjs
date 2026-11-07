@@ -609,8 +609,14 @@ const server = http.createServer(async (req, res) => {
         return res.end();
       }
       // a stranger may read, but only this panel (or a marked, allowed origin)
-      // may change anything
-      if (isMutating(req) && !isSelf(req.headers.origin, req.headers.host) && !(cors && hasMarker(req))) {
+      // may change anything. No Origin header at all = curl or the CLI on this
+      // machine — they are the studio's own hands, not a browser.
+      if (
+        isMutating(req) &&
+        req.headers.origin &&
+        !isSelf(req.headers.origin, req.headers.host) &&
+        !(cors && hasMarker(req))
+      ) {
         return fail(res, 403, 'cross-origin write rejected');
       }
       if (cors) for (const [k, v] of Object.entries(cors)) res.setHeader(k, v);
