@@ -164,6 +164,7 @@ npm start -- --allow-origin pages</code></pre>
           </div>
 
           <div class="ratios" id="ratios"></div>
+          <p class="note" id="ratioNote" hidden></p>
 
           <div class="grid2">
             <label class="field">
@@ -204,6 +205,12 @@ npm start -- --allow-origin pages</code></pre>
           <p class="lede">
             هرچه دربارهٔ ریتم، برش، تأکید و حال‌وهوای کار بگویی اینجا می‌نویسی. عدد یا ادعایی از خودم اضافه نمی‌شود.
           </p>
+          <div class="grid2">
+            <label class="field span2">
+              <span>موضوع ویدیو (یک خط — اگر خالی باشد از خود گفتار برداشت می‌شود)</span>
+              <input id="topic" placeholder="مثلاً: معرفی تخفیف تابستانهٔ فروشگاه" />
+            </label>
+          </div>
           <textarea id="direction" rows="6" placeholder="مثلاً: شروع با تیتر روی پنل بالا، کات‌ها روی ضرب آهنگ، تأکید روی کلمهٔ «تجربه»، پایان با کارت قفل برند."></textarea>
 
           <details class="advanced" data-captions-only>
@@ -219,6 +226,40 @@ npm start -- --allow-origin pages</code></pre>
           </details>
 
           <div data-motion-only>
+            <h3 class="field-title">قالب بصری</h3>
+            <div class="chips" id="templateChips"></div>
+            <div id="templateCard" hidden>
+              <img id="templateThumb" alt="" style="width:100%;max-width:180px;border-radius:8px;border:1px solid var(--hairline);display:block;margin-top:10px" />
+              <p class="note" id="templateNote"></p>
+            </div>
+
+            <h3 class="field-title">شخصیت برند</h3>
+            <div class="chips" id="brandPresets"></div>
+            <div class="grid2" style="margin-top: 10px">
+              <label class="field">
+                <span>رنگ اکسنت (اختیاری — خالی = رنگ خانه)</span>
+                <input id="brandAccent" type="color" value="#55e6a5" />
+              </label>
+              <label class="field">
+                <span>پالت از رفرنس</span>
+                <input type="text" id="brandPaletteNote" value="وقتی رفرنس تحلیل شود، پالتش جایگزین می‌شود" readonly class="static" />
+              </label>
+            </div>
+            <p class="note" id="brandNote"></p>
+
+            <details class="advanced" id="studioBrandBox">
+              <summary>برند استودیو (روی همهٔ کارها اعمال می‌شود، مگر خود کارت override کند)</summary>
+              <div class="grid2">
+                <label class="field"><span>نام برند</span><input id="sb-name" placeholder="مثلاً استودیو من" /></label>
+                <label class="field"><span>پریست شخصیت</span><select id="sb-preset"></select></label>
+                <label class="field"><span>رنگ اکسنت</span><input id="sb-accent" type="color" value="#55e6a5" /></label>
+                <label class="field"><span>رنگ زمینه (فیلم مستقل)</span><input id="sb-ground" type="color" value="#1d1d1d" /></label>
+                <label class="field"><span>رنگ متن</span><input id="sb-ink" type="color" value="#ffffff" /></label>
+                <label class="field"><span>&nbsp;</span><button type="button" class="ghost" id="sb-save">ذخیرهٔ برند استودیو</button></label>
+              </div>
+              <p class="note" id="sb-note">این فایل در workspace/.studio/brand.json ذخیره می‌شود؛ هر کار جدید همان را به ارث می‌برد و پالت رفرنس، اگر گرافیکی باشد، روی آن می‌نشیند.</p>
+            </details>
+
             <h3 class="field-title">صدای افکت</h3>
             <label class="switch">
               <input type="checkbox" id="sfxOn" checked />

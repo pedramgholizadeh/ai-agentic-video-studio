@@ -1075,7 +1075,27 @@
   "رندر شکست خورد:": "the render failed:",
   "کات شد.": "cut.",
   "ویدیوی پایه و حداقل یک قطعه لازم است.": "the base video and at least one segment are required.",
-  "هدها روی بدنهٔ قطعه نیست.": "the playhead is not on a segment body."
+  "هدها روی بدنهٔ قطعه نیست.": "the playhead is not on a segment body.",
+  "موضوع ویدیو (یک خط — اگر خالی باشد از خود گفتار برداشت می‌شود)": "Video topic (one line — leave empty and it is read from the speech itself)",
+  "مثلاً: معرفی تخفیف تابستانهٔ فروشگاه": "e.g. introducing the shop's summer sale",
+  "شخصیت برند": "Brand personality",
+  "رنگ اکسنت (اختیاری — خالی = رنگ خانه)": "Accent colour (optional — empty = the house colour)",
+  "پالت از رفرنس": "Palette from the reference",
+  "وقتی رفرنس تحلیل شود، پالتش جایگزین می‌شود": "When a reference is analysed, its palette takes over",
+  "برند استودیو (روی همهٔ کارها اعمال می‌شود، مگر خود کارت override کند)": "Studio brand (applies to every job unless the job itself overrides it)",
+  "نام برند": "Brand name",
+  "پریست شخصیت": "Personality preset",
+  "رنگ اکسنت": "Accent colour",
+  "رنگ زمینه (فیلم مستقل)": "Ground colour (standalone film)",
+  "رنگ متن": "Text colour",
+  "ذخیرهٔ برند استودیو": "Save the studio brand",
+  "این فایل در workspace/.studio/brand.json ذخیره می‌شود؛ هر کار جدید همان را به ارث می‌برد و پالت رفرنس، اگر گرافیکی باشد، روی آن می‌نشیند.": "Stored in workspace/.studio/brand.json; every new job inherits it, and a graphics reference palette sits on top of it.",
+  "حالت تیزر: زیرنویس کلمه‌به‌کلمه خودکار روی فیلم می‌سوزد و همهٔ متن‌ها داخل حاشیهٔ امن پلتفرم قفل می‌شوند — روی ۹:۱۶ یعنی دور از نوار اکشن و کپشنِ ریلز اینستاگرام.": "Teaser mode: word-by-word subtitles are burned into the film automatically and every text locks inside the platform's safe rect — on 9:16 that means clear of Instagram Reels' action rail and caption stack.",
+  "قالب ۰۰۱ — کارتون UI روشن": "Template 001 — light UI cartoon",
+  "کاغذ شطرنجی سفید، کارت‌های UI تخت با سایهٔ نرم، تیتر با کادر انتخاب فیگما، آبی سلطنتی و طلایی": "White sketch-grid ground, flat white UI cards with soft shadows, the Figma-selection-box headline, royal blue and gold",
+  "کاغذ شطرنجی (قالب ۰۰۱)": "Sketch-grid paper (template 001)",
+  "کارت UI سفید (قالب ۰۰۱)": "White UI cards (template 001)",
+  "فریم مرجع — این سبک با کد": "Reference frame — this style is saved under code"
 };
 
   /* Word-level table for interpolated text. Deliberately small and specific:
@@ -1274,7 +1294,13 @@
   "سال": "years",
   "است": "is",
   "سازگار": "compatible",
-  "سیستم": "system"
+  "سیستم": "system",
+  "حرفه‌ای و مطمئن": "professional & trustworthy",
+  "شیک و لاکچری": "refined & premium",
+  "پرانرژی و جسور": "vibrant & bold",
+  "شاد و سرزنده": "lively & joyful",
+  "آرام و دلسوز": "calm & caring",
+  "صمیمی و خودی": "friendly & familiar"
 };
 
   /* Function words and verbs. Applied only when a strong term already matched

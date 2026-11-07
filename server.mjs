@@ -25,6 +25,8 @@ import { recipeList, DENSITY, MATERIALS, TRANSITIONS } from './lib/motions.mjs';
 import { kitCatalog, SOUND_LEVELS } from './lib/sfx.mjs';
 import { ICON_META, bundledNames } from './lib/icons.mjs';
 import { analyze as analyzeReference } from './lib/reference.mjs';
+import { PERSONALITIES, BANNED_DEFAULTS, readStudioBrand, writeStudioBrand, resolveBrand } from './lib/brand.mjs';
+import { templateList, templateById, TEMPLATES } from './lib/templates.mjs';
 import * as jobs from './lib/jobs.mjs';
 import { probe } from './lib/plan.mjs';
 import { enqueue, handoffDocument } from './lib/agent.mjs';
@@ -48,12 +50,13 @@ const PORT = Number(arg('port', readConfig().port || 8790));
 const ALLOWED = parseAllowed(arg('allow-origin', readConfig().allowOrigin || ''));
 if (ALLOWED) console.log(`cors: allowing ${ALLOWED.join('  ')}`);
 
-/** The picker needs the real stage markup, at a canvas the browser can scale. */
+/** The picker needs the real stage markup, at a canvas the browser can scale.
+ *  The studio brand paints the previews, so what the user sees is what ships. */
 function backgroundCards(ratioId) {
   const r = ratioById(ratioId);
   const g = geometry(r.w, r.h);
   return BACKGROUNDS.map((b) => {
-    const stage = buildStage(b.id, g, { videoSrc: null, film: 8 });
+    const stage = buildStage(b.id, g, { videoSrc: null, film: 8, brand: readStudioBrand() });
     return {
       id: b.id,
       fa: b.fa,
@@ -104,6 +107,9 @@ function manifest() {
     materials: Object.entries(MATERIALS).map(([id, m]) => ({ id, fa: m.fa })),
     soundLevels: Object.entries(SOUND_LEVELS).map(([id, l]) => ({ id, fa: l.fa })),
     transitions: Object.entries(TRANSITIONS).map(([id, t]) => ({ id, fa: t.fa })),
+    personalities: PERSONALITIES.map(({ id, fa, hint }) => ({ id, fa, hint })),
+    templates: templateList(),
+    bannedDefaults: BANNED_DEFAULTS,
     qualities: [
       { id: 'draft', fa: 'پیش‌نویس (سریع)' },
       { id: 'looks', fa: 'محلی (CRF 16)' },
@@ -220,6 +226,29 @@ const server = http.createServer(async (req, res) => {
       const body = await readBody(req);
       writeConfig(body || {});
       return json(res, 200, publicConfig());
+    }
+
+    // the studio-wide brand: one token set every job inherits until it overrides
+    if (req.method === 'GET' && url.pathname === '/api/brand') {
+      const stored = readStudioBrand();
+      return json(res, 200, { brand: stored, resolved: resolveBrand({ studioBrand: stored }), personalities: PERSONALITIES, bannedDefaults: BANNED_DEFAULTS });
+    }
+    // a template's reference frame — the panel shows the real source frame
+    // while picking, so "which style is 001?" is answered by the film itself
+    if (req.method === 'GET' && parts[0] === 'api' && parts[1] === 'templates' && parts[3] === 'thumb') {
+      const tpl = templateById(parts[2]);
+      const file = tpl ? path.join(STUDIO_ROOT, tpl.source) : null;
+      if (!file || !fs.existsSync(file)) return json(res, 404, { error: 'فریم مرجع این قالب پیدا نشد' });
+      return sendFile(req, res, file);
+    }
+    if ((req.method === 'PUT' || req.method === 'POST') && url.pathname === '/api/brand') {
+      const body = await readBody(req);
+      try {
+        const clean = writeStudioBrand(body || {});
+        return json(res, 200, { brand: clean, resolved: resolveBrand({ studioBrand: clean }) });
+      } catch (err) {
+        return json(res, 400, { error: String(err.message || err).slice(0, 400), problems: err.problems || [] });
+      }
     }
 
     if (req.method === 'GET' && url.pathname === '/api/preflight') {

@@ -26,12 +26,20 @@ Work only inside this repository; the browser panel is already watching.
    node cli.mjs log <id> info "beats sheet built — 4 cards"
    node cli.mjs progress <id> render 40
    ```
-5. **Facts are sacred**: card copy is the SRT's own words. No number, claim
-   or name that is not spoken.
-6. **Watch before done**: review the stills at the beat sheet's timestamps;
+5. **Understand before you build**: the `direction` stage is real work — write
+   `brief.json` (`node scripts/motion.mjs brief …`: topic, thesis, arc, facts
+   with their basis) and `brand.json` (`node scripts/motion.mjs brand …`)
+   **before** the beat sheet, and plan against them. Record the judgment table
+   in `notes/decisions.md`.
+6. **Facts are sacred**: card copy is the SRT's own words. No number, claim
+   or name that is not spoken — in the cards or in the brief.
+7. **One brand token set**: `brand.json` governs every colour, duration,
+   easing and stagger; change it once at the start if needed, never per beat,
+   and audit the stills against the project's `banned` list.
+8. **Watch before done**: review the stills at the beat sheet's timestamps;
    `node scripts/motion.mjs inspect --file <layer>` must answer
    `hasAlpha: true` and `fps: 30` for an overlay.
-7. **Deliver**:
+9. **Deliver**:
    ```sh
    node cli.mjs done <id> <output file>
    ```

@@ -89,10 +89,10 @@ right-to-left.
 3. **Background** — for the standalone/captions films: brand graphite, mint
    waves, dot fields, film grain, or your own blurred footage. Previews use
    the same code that renders.
-4. **Direction and settings** — free-text notes, title/end-card copy, SFX on
-   or off, CPU cap, and who does the work: the deterministic studio pipeline,
-   an OpenAI-compatible model for edit direction, or a code agent via the
-   queue.
+4. **Direction and settings** — the video's topic, free-text notes, the brand
+   personality (six presets + accent colour), title/end-card copy, SFX on or
+   off, CPU cap, and who does the work: the deterministic studio pipeline, an
+   OpenAI-compatible model for edit direction, or a code agent via the queue.
 
 ### Learning from a reference video
 
@@ -101,7 +101,104 @@ motion energy, audio rhythm, palette — and shows what it learned as a style
 profile: sample frames from the reference, an energy gauge, the learned card
 cadence, and the suggested density with a one-click *apply* button. No frame
 is ever copied; the numbers drive the beat engine so your film moves *like*
-the reference.
+the reference. When the reference is itself a motion graphic, its measured
+palette (ink, accent, ground) also becomes the film's colours.
+
+### Teaser ratios: subtitles + platform safe zones (9:16, 16:9)
+
+Pick **9:16** (Reels/TikTok size) or **16:9** and the film behaves like a
+teaser, automatically:
+
+- **Burned-in subtitles** — the SRT itself rides the film word-by-word
+  (karaoke-style: each word lights at its spoken time, hot words take the
+  brand accent). Copy is never rewritten — it is the transcript's own words.
+- **Instagram Reels safe zones** — the chrome (username/camera row on top,
+  caption/audio/CTA stack at the bottom, the action rail on the right) owns
+  the edges of a 9:16 board. Every motion card *and* every subtitle sits
+  inside the safe rect (`lib/safe.mjs` holds the numbers: top 12.5 %, bottom
+  24 %, right 13.5 %, left 6 %), and no card may enter the caption band.
+  16:9 keeps a plain 5 % action-safe box.
+
+The beat validator refuses a card outside the safe rect, the writer clamps
+card width to it, and the project's `notes/motion-spec.md` records the
+enforced margins. Set `output.teaserCaptions: false` in the job config if you
+want the teaser look without the burned-in subs.
+
+## Visual templates: one code, one whole look
+
+`lib/templates.mjs` packages a complete visual language distilled from a real
+reference film into one code. Pick it in the wizard (the panel shows the
+reference film's own frame while you choose) or send `"template": "001"` in
+the job config.
+
+**Template 001 — «کارتون UI روشن»** is vectorised from the studio owner's
+reference teaser (frame kept at `assets/templates/001/reference.jpg`,
+colours measured from its pixels): white sketch-grid ground with a soft
+vignette, flat white UI cards (hairline border, soft shadow, 3 % radius),
+the two-tier headline — spoken words bold ink, upcoming words faded, key
+words in italic serif inside a Figma-style selection box — royal blue
+`#2E67FF`, gold `#F9C24F`, and the springy `lively-joyful` motion
+personality. A template locks the ground painter (`paper-grid`) and the card
+material (`ui`), flips the caption band to the top of the frame, and appends
+its own `banned` defaults (no dark ground, no glass/glow on the white cards).
+
+Everything else — brief, beats, facts-sacred copy, safe zones, the ≤ 50 % CPU
+render — runs exactly as before; the template only steers the look. List
+what's installed with `node scripts/motion.mjs templates`, and plan a job
+from the terminal with `beats … --template 001` / `write … --template 001`.
+
+## Brand & brief: the `direction` stage
+
+Every job passes through a real **direction** stage before any beat is
+planned. It writes two artifacts into the job folder:
+
+- **`brief.json`** — the purposeful read of the topic, shotcraft-style: the
+  topic (from the user or the strongest spoken material), the one sentence the
+  film has to prove, audience and goal, the narrative arc (`promo`:
+  hook → substance → landing, or `explainer`: question → intuition → steps →
+  recap), the mood, and `facts[]` — numbers, units and latin names extracted
+  only from the transcript and the user's own direction. `validateBrief`
+  rejects any brief whose numbers do not appear in those texts; a model may
+  rewrite the prose, never the numbers.
+- **`brand.json`** — one resolved token set for the whole film, merged
+  `house ← studio brand ← job override ← reference palette`. The studio-wide
+  file lives at `workspace/.studio/brand.json` (editable from the panel).
+
+The brand token set carries two halves, after HyperFrames' `frame.md`
+doctrine — colour and type are *strict* brand truth; motion is the
+personality that executes it:
+
+| Preset | Character | Motion numbers (energy · entrances · exits · overshoot · holds) |
+|---|---|---|
+| `professional-trust` | حرفه‌ای و مطمئن | 0.35 · ×0.92 · ×0.85 · soft kicks · +15% |
+| `refined-premium` | شیک و لاکچری | 0.30 · ×1.35 · ×1.05 · minimal · +30% |
+| `vibrant-bold` | پرانرژی و جسور | 0.75 · ×0.75 · ×0.70 · full overshoot · −10% |
+| `lively-joyful` | شاد و سرزنده | 0.65 · ×0.95 · ×0.85 · springy · +0% |
+| `calm-caring` | آرام و دلسوز | 0.25 · ×1.20 · ×1.10 · none · +35% |
+| `friendly` | صمیمی و خودی | 0.50 · ×0.95 · ×0.90 · gentle spring · +5% |
+
+One token set governs all motion — never mix a second set into a film. The
+brief's arc also biases the beat engine: the opening beat wants a hook shape
+(`question`/`keyword`), the closing one wants a landing (`brand`/`badge`), and
+every boost can only re-order recipes whose gates already passed, so the arc
+never forces a shape the speech does not support.
+
+Each project ships with the brand's `banned` defaults list (everything
+centred, everything fading in at once, text moving while read, three
+identical cards in a row, meaningless glow, corner-docked logo) in
+`index.html` and `notes/motion-spec.md` — after the first render, name every
+default you still see, add it to the list, and fix the film. The list grows
+with every film.
+
+### The two commands
+
+```sh
+node scripts/motion.mjs brief --srt <job>/input/script.fa.srt --direction "…" --out <job>/brief.json
+node scripts/motion.mjs brand --job <id> --out <job>/brand.json
+```
+
+`beats` takes `--brief` and `--brand`; `write` takes `--brand`. With no flags
+the house look applies, exactly as before.
 
 ## Using it from a code agent
 
@@ -235,7 +332,31 @@ the sources that the dictionaries do not yet cover — keep it at zero.
 The engine does not write copy. Card text is the SRT's own words; numbers on
 counters exist only because they appear in the speech; the reference video
 teaches *style* (card cadence, motion energy, framing) and no frame is copied.
-If a card needs a different headline, you write it in *Direction*.
+If a card needs a different headline, you write it in *Direction*. The brief
+stage enforces the same rule harder: `validateBrief()` rejects a brief whose
+numbers do not appear in the transcript or the user's direction.
+
+## Future bridges (deliberately not wired)
+
+Two more renderers were studied; both stay out of the pipeline for now, and
+this is the record of why and how they could join later:
+
+- **Manim (ManimCommunity)** — MIT, unbeatable for math/geometry/data segments
+  (`TransformMatchingTex` equation morphs, `NumberPlane`, updaters), but it
+  brings a Python + cairo/pango + LaTeX toolchain and renders at 2–4×
+  realtime, and its scenes are Python-only (no declarative input). If a job
+  ever genuinely needs a 5–15 s concept insert, the clean bridge is: render
+  the section as a **transparent WebM or PNG sequence** (`manim -t
+  --format=webm`, or `--save_sections` for per-section files + JSON index),
+  inject brand colours/fonts via `manim.cfg` and a small Python template
+  layer, then composite it in the existing ffmpeg path like any other alpha
+  layer. Its *craft ideas* (semantic colour, build element-by-element,
+  why-before-what) already live in the brief's explainer arc.
+- **Remotion** — the frame-pure function idea and the spring/interpolate math
+  informed this studio's deterministic writers, but adopting the framework
+  itself means a source-available license that requires a paid company key
+  beyond 3 employees; the studio renders through HyperFrames (Apache-2.0) and
+  stays there.
 
 ## Troubleshooting
 

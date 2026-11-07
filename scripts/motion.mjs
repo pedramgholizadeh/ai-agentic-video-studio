@@ -4,8 +4,11 @@
  * the same library the built-in runner uses, one call at a time.
  *
  *   node scripts/motion.mjs analyze --video ref.mp4 --out style.json
- *   node scripts/motion.mjs beats   --srt script.fa.srt [--style style.json] --out beats.json [--ratio 9:16] [--deliver overlay] [--density auto] [--material glass]
- *   node scripts/motion.mjs write   --beats beats.json --dir project [--ratio 9:16] [--audio sfx.wav]
+ *   node scripts/motion.mjs templates                                  # list the visual-style templates
+ *   node scripts/motion.mjs brief   --srt script.fa.srt [--direction "…"] --out brief.json
+ *   node scripts/motion.mjs brand   [--job <id>] [--style style.json] [--out brand.json]
+ *   node scripts/motion.mjs beats   --srt script.fa.srt [--style style.json] [--brief brief.json] [--brand brand.json] [--template 001] --out beats.json [--ratio 9:16] [--deliver overlay] [--density auto] [--material glass]
+ *   node scripts/motion.mjs write   --beats beats.json --dir project [--ratio 9:16] [--audio sfx.wav] [--brand brand.json] [--template 001]
  *   node scripts/motion.mjs sfx     --beats beats.json --out outdir [--level balanced] [--voice master.mp4]
  *   node scripts/motion.mjs stills  --beats beats.json          # review times, one per beat
  *   node scripts/motion.mjs slim    --file layer.webm --out layer.webm [--crf 30] [--threads 2]
@@ -21,6 +24,9 @@ import path from 'node:path';
 import { ratioById } from '../lib/ratios.mjs';
 import { analyze } from '../lib/reference.mjs';
 import { buildBeats, validate, stillTimes } from '../lib/beats.mjs';
+import { buildBrief, validateBrief, describeBrief } from '../lib/brief.mjs';
+import { resolveBrand, readStudioBrand, describeBrand } from '../lib/brand.mjs';
+import { TEMPLATES, templateById, templateList } from '../lib/templates.mjs';
 import { writeMotionProject } from '../lib/motion-project.mjs';
 import { planCues, mixAndVerify, SOUND_LEVELS } from '../lib/sfx.mjs';
 import { collagePreview, inspectLayer, dropInNote } from '../lib/composite.mjs';
@@ -35,8 +41,22 @@ const [cmd, ...argv] = process.argv.slice(2);
  * the moment it is read. */
 const PATH_FLAGS = new Set([
   'srt', 'style', 'out', 'beats', 'dir', 'video', 'file', 'base', 'layer',
-  'voice', 'sfx', 'note', 'input', 'output',
+  'voice', 'sfx', 'note', 'input', 'output', 'brief', 'brand',
 ]);
+/** A JSON file read as input, or null when the flag is absent/unreadable. */
+const readJsonFlag = (name) => {
+  const file = opt(name);
+  try {
+    return file && fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : null;
+  } catch (err) {
+    throw new Error(`${name}: فایل JSON خوانده نشد (${file}): ${err.message}`);
+  }
+};
+const writeOut = (file, data) => {
+  if (!file) return;
+  fs.mkdirSync(path.dirname(path.resolve(file)), { recursive: true });
+  fs.writeFileSync(file, JSON.stringify(data, null, 2) + '\n', 'utf8');
+};
 const opt = (name, fb = null) => {
   const i = argv.indexOf(`--${name}`);
   if (i < 0) return fb;
@@ -51,6 +71,42 @@ if (cmd === 'analyze') {
   if (!video) throw new Error('--video لازم است');
   const style = await analyze(video, { out: opt('out'), onStage: (n) => console.error(`… ${n}`) });
   say({ source: style.source, derived: style.derived, notes: style.notes });
+} else if (cmd === 'templates') {
+  // what visual languages the studio ships, one code each
+  say({ templates: templateList() });
+} else if (cmd === 'brief') {
+  // the direction stage, as a command: the purposeful read of the topic.
+  // facts[] comes only from the SRT and the direction; validateBrief rejects
+  // anything a model or a hand may have added on top.
+  const srtFile = opt('srt');
+  const direction = opt('direction', '');
+  const srtText = srtFile && fs.existsSync(srtFile) ? fs.readFileSync(srtFile, 'utf8') : '';
+  let brief = buildBrief({ srtText, directionText: direction });
+  if (opt('merge')) {
+    const { mergeBrief } = await import('../lib/brief.mjs');
+    brief = mergeBrief(brief, readJsonFlag('merge'), srtText, direction);
+  }
+  const problems = validateBrief(brief, srtText, direction);
+  const out = opt('out');
+  writeOut(out, brief);
+  say({ file: out || null, problems, ...Object.fromEntries(describeBrief(brief).map((l, i) => [`line${i + 1}`, l])) });
+} else if (cmd === 'brand') {
+  // resolve one token set: house ← studio brand.json ← job override ← reference palette
+  const jobId = opt('job');
+  let jobConfig = null;
+  let style = null;
+  if (jobId) {
+    const jobs = await import('../lib/jobs.mjs');
+    const job = jobs.get(jobId);
+    if (!job) throw new Error(`شغل ${jobId} پیدا نشد`);
+    jobConfig = job.config;
+    const styleDefault = path.join(jobs.paths(jobId).root, 'style.json');
+    const styleFile = opt('style', fs.existsSync(styleDefault) ? styleDefault : null);
+    if (styleFile && fs.existsSync(styleFile)) style = JSON.parse(fs.readFileSync(styleFile, 'utf8'));
+  }
+  const brand = resolveBrand({ jobConfig, studioBrand: readStudioBrand(), style });
+  writeOut(opt('out'), brand);
+  say({ file: opt('out') || null, summary: describeBrand(brand), ...brand });
 } else if (cmd === 'beats') {
   const srt = opt('srt');
   if (!srt) throw new Error('--srt لازم است');
@@ -59,13 +115,18 @@ if (cmd === 'analyze') {
   runSrt(['plan', tl, '--out', tl], tmp);
   const timeline = JSON.parse(fs.readFileSync(tl, 'utf8'));
   const styleFile = opt('style');
+  const tplId = opt('template');
+  if (tplId && !templateById(tplId)) throw new Error(`قالب «${tplId}» وجود ندارد (${Object.keys(TEMPLATES).join('، ')})`);
   const sheet = buildBeats(
     timeline,
     styleFile && fs.existsSync(styleFile) ? JSON.parse(fs.readFileSync(styleFile, 'utf8')) : null,
     {
+      brief: readJsonFlag('brief'),
+      brand: readJsonFlag('brand'),
+      template: tplId || null,
       deliver: opt('deliver', 'overlay'),
       density: opt('density', 'auto'),
-      material: opt('material', 'glass'),
+      material: tplId ? templateById(tplId).material : opt('material', 'glass'),
       ratio: opt('ratio', '9:16'),
       maxBeats: Number(opt('max-beats', '0')) || undefined,
     },
@@ -89,11 +150,13 @@ if (cmd === 'analyze') {
     sheet,
     canvas: { width: r.w, height: r.h, fps: Number(opt('fps', 30)), ratio: r.id },
     deliver: sheet.config?.deliver || opt('deliver', 'overlay'),
-    background: opt('background', 'site'),
+    background: opt('background', sheet.config?.template ? templateById(sheet.config.template).background : 'site'),
+    template: sheet.config?.template || opt('template'),
+    brand: readJsonFlag('brand'),
     fetchIcons: false,
     audio: audio ? [{ id: 'sfx', src: stageFile(audio, dir, 'media/sfx.wav'), start: 0, duration: sheet.beats.at(-1).end, volume: 1, track: 40 }] : [],
   });
-  say({ dir: built.dir, film: built.film, beats: built.beats, cues: built.cues, canvas: built.canvas, files: built.files });
+  say({ dir: built.dir, film: built.film, beats: built.beats, cues: built.cues, captions: built.captions, safe: built.safe, canvas: built.canvas, files: built.files });
 } else if (cmd === 'sfx') {
   const beatsFile = opt('beats');
   const outDir = opt('out');
@@ -188,7 +251,7 @@ if (cmd === 'analyze') {
   say({ ...info, ok: info.fps === 30 && (info.hasAlpha || file.endsWith('.mp4')) });
 } else {
   console.log(
-    'usage: motion.mjs analyze|beats|write|sfx|stills|slim|collage|inspect …  (see the file header for the flags)',
+    'usage: motion.mjs analyze|templates|brief|brand|beats|write|sfx|stills|slim|collage|inspect …  (see the file header for the flags)',
   );
   process.exitCode = cmd ? 2 : 0;
 }

@@ -14,6 +14,8 @@ const S = {
   output: { ratio: '2:1', background: 'site', layout: 'auto', quality: 'delivery', format: 'mp4', maxMb: 200, fps: 30 },
   motion: { mode: 'motion', deliver: 'overlay', density: 'auto', material: 'glass' },
   sound: { sfx: true, level: 'balanced' },
+  brand: { preset: 'house', accent: '' },
+  template: null,
   style: null,
   engine: { mode: 'agent', provider: 'openrouter', model: '' },
   cpu: 50,
@@ -57,6 +59,8 @@ async function boot() {
   renderLayouts();
   renderQualities();
   renderBackgrounds();
+  renderBrandPresets();
+  renderTemplates();
   renderEngines();
   renderProviderSelect();
   fillTextDefaults(d);
@@ -202,9 +206,23 @@ function renderRatios() {
       $$('#ratios .card').forEach((c) => c.classList.remove('on'));
       b.classList.add('on');
       renderBackgrounds(true);
+      paintTeaserNote();
     };
     box.appendChild(b);
   }
+  paintTeaserNote();
+}
+
+/** Teaser ratios (9:16, 16:9) automatically burn subtitles in and lock every
+ *  text inside the platform safe rect — say so where the ratio is picked. */
+function paintTeaserNote() {
+  const note = $('#ratioNote');
+  if (!note) return;
+  const teaser = ['9:16', '16:9'].includes(S.output.ratio);
+  note.hidden = !teaser;
+  note.textContent = teaser
+    ? 'حالت تیزر: زیرنویس کلمه‌به‌کلمه خودکار روی فیلم می‌سوزد و همهٔ متن‌ها داخل حاشیهٔ امن پلتفرم قفل می‌شوند — روی ۹:۱۶ یعنی دور از نوار اکشن و کپشنِ ریلز اینستاگرام.'
+    : '';
 }
 
 function renderLayouts() {
@@ -324,6 +342,113 @@ function renderSfxNote() {
   $('#sfxNote').textContent = S.sound.sfx
     ? 'هر صدا روی همان ساعت ویدیو می‌نشیند و بلندیش اندازه‌گیری می‌شود: اگر زیر گفتار بماند، بلندتر می‌شود.'
     : 'لایه بی‌صدا تحویل می‌شود؛ صدای خودت سر جایش می‌ماند.';
+}
+
+/**
+ * Visual-style templates (lib/templates.mjs): one code, one whole look.
+ * Picking one shows the reference film's own frame, so "which style is 001?"
+ * is answered by the source itself.
+ */
+function renderTemplates() {
+  const box = $('#templateChips');
+  if (!box) return;
+  const list = [{ id: null, fa: 'سلیقهٔ خانه' }, ...(S.manifest?.templates || [])];
+  box.innerHTML = '';
+  for (const t of list) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip' + ((S.template || null) === t.id ? ' on' : '');
+    b.title = t.hint || '';
+    b.textContent = t.id ? `${t.fa} · ${t.id}` : t.fa;
+    b.onclick = () => {
+      S.template = t.id;
+      $$('#templateChips .chip').forEach((x) => x.classList.remove('on'));
+      b.classList.add('on');
+      paintTemplateCard();
+    };
+    box.appendChild(b);
+  }
+  paintTemplateCard();
+}
+
+function paintTemplateCard() {
+  const card = $('#templateCard');
+  if (!card) return;
+  const tpl = (S.manifest?.templates || []).find((t) => t.id === S.template);
+  card.hidden = !tpl;
+  if (!tpl) return;
+  $('#templateThumb').src = ENGINE.url(`/api/templates/${tpl.id}/thumb`);
+  $('#templateNote').textContent = `فریم مرجع — این سبک با کد ${tpl.id} ذخیره شده: ${tpl.hint}. زمینه «${tpl.background}» و کارت‌های «${tpl.material}» از قالب قفل می‌شوند.`;
+}
+
+/**
+ * The brand personality: one token set for the whole film (shotcraft's six
+ * brand→motion presets). 'house' keeps the studio's own look.
+ */
+function renderBrandPresets() {
+  const box = $('#brandPresets');
+  if (!box) return;
+  const list = [{ id: 'house', fa: 'سلیقهٔ خانه', hint: 'اعداد خانهٔ استودیو' }, ...(S.manifest?.personalities || [])];
+  box.innerHTML = '';
+  for (const p of list) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'chip' + ((S.brand.preset || 'house') === p.id ? ' on' : '');
+    b.title = p.hint || '';
+    b.textContent = p.fa;
+    b.onclick = () => {
+      S.brand.preset = p.id;
+      $$('#brandPresets .chip').forEach((x) => x.classList.remove('on'));
+      b.classList.add('on');
+      $('#brandNote').textContent = p.hint ? `یک ست توکن برای کل موشن: ${p.hint}` : '';
+    };
+    box.appendChild(b);
+  }
+  const accent = $('#brandAccent');
+  if (accent)
+    accent.oninput = () => {
+      S.brand.accent = accent.value;
+    };
+  initStudioBrandEditor().catch(() => {});
+}
+
+/** The studio-wide brand file: every job inherits it unless it overrides. */
+async function initStudioBrandEditor() {
+  const box = $('#studioBrandBox');
+  if (!box || box.dataset.done) return;
+  const r = await api('/api/brand');
+  box.dataset.done = '1';
+  const sel = $('#sb-preset');
+  sel.innerHTML =
+    `<option value="">(پریست ندارد — اعداد خانه)</option>` +
+    (r.personalities || []).map((p) => `<option value="${esc(p.id)}">${esc(p.fa)}</option>`).join('');
+  const b = r.brand || {};
+  $('#sb-name').value = b.name || '';
+  sel.value = b.preset && b.preset !== 'house' ? b.preset : '';
+  if (b.palette?.accent) $('#sb-accent').value = b.palette.accent;
+  if (b.palette?.ground) $('#sb-ground').value = b.palette.ground;
+  if (b.palette?.ink) $('#sb-ink').value = b.palette.ink;
+  $('#sb-note').textContent = r.resolved
+    ? `الان اثر می‌کند: شخصیت «${b.presetFa || 'خانه'}»، اکسنت ${r.resolved.palette.accent}، انرژی ${r.resolved.motion.energy}`
+    : $('#sb-note').textContent;
+  $('#sb-save').onclick = async () => {
+    const patch = {
+      name: $('#sb-name').value.trim(),
+      preset: $('#sb-preset').value || 'house',
+      palette: {
+        accent: $('#sb-accent').value,
+        ground: $('#sb-ground').value,
+        ink: $('#sb-ink').value,
+      },
+    };
+    try {
+      const saved = await api('/api/brand', { method: 'PUT', body: JSON.stringify(patch) });
+      $('#sb-note').textContent = `ذخیره شد — اکسنت ${saved.resolved.palette.accent}، انرژی ${saved.resolved.motion.energy}`;
+      renderBackgrounds();
+    } catch (e) {
+      $('#sb-note').textContent = `ذخیره نشد: ${e.message}`;
+    }
+  };
 }
 
 async function renderRecipes() {
@@ -561,6 +686,14 @@ async function analyzeStyle(info) {
     const style = await api('/api/reference/analyze', { method: 'POST', body: JSON.stringify({ path: info.path }) });
     S.style = style;
     paintStyle(style);
+    const pal = style?.picture?.palette;
+    const learned = style?.derived?.paletteMode === 'match' && pal?.accent;
+    const note = $('#brandPaletteNote');
+    if (note)
+      note.value = learned
+        ? `از رفرنس یاد گرفته شد: اکسنت ${pal.accent} · متن ${pal.ink}`
+        : 'رفرنس پالت گرافیکی نداشت — رنگ خانه می‌ماند';
+    if (learned) flash('پالت رفرنس یاد گرفته شد و در مرحلهٔ برند اعمال می‌شود.');
     if (S.motion.density === 'auto') flash('سبک از رفرنس خوانده شد؛ چگالی «از رفرنس» همین را دنبال می‌کند.');
   } catch (e) {
     read.innerHTML = `<span class="pill bad">سبک خوانده نشد: ${esc(e.message)}</span>`;
@@ -722,8 +855,11 @@ function jobConfig() {
   };
   const endcard = { name: $('#e-name').value.trim(), site: $('#e-site').value.trim() };
   const motion = S.motion.mode === 'motion';
+  const accent = $('#brandAccent')?.value || '';
   return {
     name: ($('#direction').value.trim().slice(0, 40) || `${S.output.ratio} ویدیو`).replace(/\s+/g, '-'),
+    topic: $('#topic')?.value.trim() || '',
+    template: S.template || null,
     source: {
       video: S.source.video?.path || null,
       audio: S.source.audio?.path || null,
@@ -734,6 +870,12 @@ function jobConfig() {
     background: S.output.background,
     motion: { ...S.motion, ...(S.style ? { styleFrom: S.source.reference?.name } : {}) },
     sound: { ...S.sound },
+    brand: motion
+      ? {
+          preset: S.brand.preset || 'house',
+          ...(accent && accent.toLowerCase() !== '#55e6a5' ? { palette: { accent } } : {}),
+        }
+      : undefined,
     direction: { text: $('#direction').value.trim(), title, endcard },
     title,
     endcard,
