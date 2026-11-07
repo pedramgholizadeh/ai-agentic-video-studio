@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+# cool-run — run a heavy media job at half the machine's power.
+#
+#   cool-run <command> [args...]     wrap and run
+#   cool-run --threads               print the half-core number and exit
+#   cool-run --check                 print load, thermal state and heavy jobs
+set -euo pipefail
+
+CORES=$(sysctl -n hw.physicalcpu 2>/dev/null || echo 4)
+HALF=$((CORES / 2))
+[ "$HALF" -lt 1 ] && HALF=1
+
+case "${1:-}" in
+  --threads)
+    echo "$HALF"
+    exit 0
+    ;;
+  --check)
+    echo "physical cores: $CORES   power cap: $HALF (50%)"
+    echo "load average: $(sysctl -n vm.loadavg | tr -d '{}')"
+    pmset -g therm 2>/dev/null | grep -vE '^$' | head -6
+    echo '--- heavy media jobs running now ---'
+    ps -Ao %cpu,pid,comm | grep -iE 'ffmpeg|chrome-headless|hyperframes|whisper|node' |
+      awk '$1 > 20 {printf "%5.1f%%  %s\n", $1, $3}' | head -10
+    exit 0
+    ;;
+esac
+
+[ "$#" -gt 0 ] || { echo "usage: cool-run <command> [args...] | --threads | --check" >&2; exit 2; }
+
+export OMP_NUM_THREADS=$HALF
+export MKL_NUM_THREADS=$HALF
+export OPENBLAS_NUM_THREADS=$HALF
+export NUMEXPR_NUM_THREADS=$HALF
+
+exec taskpolicy -c background nice -n 15 "$@"

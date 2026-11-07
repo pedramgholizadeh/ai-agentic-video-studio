@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#101111">
+<title>استودیو ویدیو — Video Studio</title>
+<link rel="stylesheet" href="/assets/fonts/vazirmatn.css">
+<link rel="stylesheet" href="/app.css">
+</head>
+<body>
+
+<div class="banner" id="engineOff" hidden>
+  <b>موتور روی این ماشین روشن نیست.</b>
+  <span>روی کامپیوتر خودت <code>npm start</code> را اجرا کن — پورت: <input id="enginePort" type="number" value="8790"> <button id="engineRetry" class="ghost tiny">امتحان</button></span>
+  <span id="engineState"></span>
+</div>
+
+<header class="top">
+  <a class="brand" href="#" data-view="new-job">
+    <span class="brand-mark" aria-hidden="true">▶</span>
+    <span class="brand-name">استودیو ویدیو</span>
+  </a>
+  <nav class="nav">
+    <button class="nav-link on" data-view="new-job">جاب جدید</button>
+    <button class="nav-link" data-view="jobs">جاب‌ها</button>
+    <button class="nav-link" data-view="references">رفرنس‌ها</button>
+    <button class="nav-link" data-view="settings">تنظیمات</button>
+  </nav>
+  <div class="top-end">
+    <div class="machine" id="machine"></div>
+    <button class="ghost tiny" id="langBtn">EN</button>
+  </div>
+</header>
+
+<main>
+
+<!-- ═══════════════ ۱. جاب جدید (مرحلهٔ صفر) ═══════════════ -->
+<section id="new-job-view" class="view on">
+  <h2>جاب جدید</h2>
+  <p class="lead">دو فایل بده — ویدیوی خودت و یک ویدیوی رفرنس — بقیه‌اش با ایجنتِ انتخابی خودت.</p>
+
+  <div class="new-grid">
+    <ol class="steps" id="wizardSteps">
+      <li class="active" data-step="1"><span>۱</span><div><b>ایجنت</b><small>کی ادیت را انجام می‌دهد</small></div></li>
+      <li data-step="2"><span>۲</span><div><b>ورودی‌ها</b><small>ویدیوی من + رفرنس</small></div></li>
+      <li data-step="3"><span>۳</span><div><b>خروجی</b><small>نسبت، کیفیت، صدا</small></div></li>
+      <li data-step="4"><span>۴</span><div><b>شروع</b><small>مرور و اجرا</small></div></li>
+    </ol>
+
+    <div class="wizard-body">
+      <!-- گام ۱: ایجنت -->
+      <div class="wstep on" data-wstep="1">
+        <h3>مرحلهٔ صفر — چه کسی ادیت کند؟</h3>
+        <div class="cards two" id="agentCards"></div>
+        <div class="provider-block" id="providerBlock" hidden>
+          <h4>مغز API</h4>
+          <div class="cards two" id="providerCards"></div>
+          <div class="fields">
+            <label>مدل <input id="providerModel" type="text" placeholder="model name"></label>
+            <label>کلید API <input id="providerKey" type="password" placeholder="sk-…"></label>
+            <label id="providerBaseRow" hidden>آدرس پایه <input id="providerBase" type="text" placeholder="https://…"></label>
+          </div>
+        </div>
+        <p class="note" id="agentNote"></p>
+      </div>
+
+      <!-- گام ۲: ورودی‌ها -->
+      <div class="wstep" data-wstep="2">
+        <h3>دو فایل ورودی</h3>
+        <div class="cards two">
+          <div class="card source" id="srcVideo">
+            <h4>ویدیوی من</h4>
+            <p class="hint">همان فیلمی که باید ادیت شود.</p>
+            <div class="slot" data-slot="video"><span>فایل را بکِش و رها کن، یا</span><button class="ghost tiny pick">از دیسک انتخاب کن</button><em id="srcVideoName">هیچ</em></div>
+            <p class="probe" id="srcVideoProbe"></p>
+          </div>
+          <div class="card source" id="srcRef">
+            <h4>ویدیوی رفرنس</h4>
+            <p class="hint">سبک هدف — ریتم، ترنزیشن، پالت. یک بار تحلیل می‌شود و برای همیشه یاد می‌ماند.</p>
+            <div class="slot" data-slot="reference"><span>فایل را بکِش و رها کن، یا</span><button class="ghost tiny pick">از دیسک انتخاب کن</button><em id="srcRefName">هیچ</em></div>
+            <p class="probe" id="srcRefProbe"></p>
+            <div id="refSuggest"></div>
+          </div>
+        </div>
+        <div class="fields row">
+          <label>لوگو (اختیاری) <input type="text" id="logoPath" placeholder="مسیر فایل لوگو — PNG شفاف بهترین است"></label>
+        </div>
+      </div>
+
+      <!-- گام ۳: خروجی -->
+      <div class="wstep" data-wstep="3">
+        <h3>خروجی نهایی</h3>
+        <div class="cards two" id="ratioCards"></div>
+        <p class="note" id="ratioNote" hidden>حالت تیزر: زیرنویس کلمه‌به‌کلمه خودکار روی فیلم می‌سوزد و همهٔ متن‌ها داخل حاشیهٔ امن پلتفرم قفل می‌شوند — روی ۹:۱۶ دور از نوار اکشن و کپشنِ ریلز اینستاگرام.</p>
+        <div class="fields row">
+          <label>کیفیت
+            <select id="quality"><option value="draft">پیش‌نویس (سریع)</option><option value="looks">خوش‌دید (متوسط)</option><option value="delivery" selected>تحویل (تمیز)</option></select>
+          </label>
+          <label>سقف حجم (مگابایت) <input id="maxMb" type="number" value="200" min="20" max="2000"></label>
+          <label>مدل whisper
+            <select id="whisperModel"></select>
+          </label>
+        </div>
+        <h4>صدا</h4>
+        <div class="chips" id="soundLevelChips"></div>
+      </div>
+
+      <!-- گام ۴: شروع -->
+      <div class="wstep" data-wstep="4">
+        <h3>مرور و اجرا</h3>
+        <div class="fields">
+          <label>نام جاب <input id="jobName" type="text" placeholder="بی‌نام می‌ماند اگر خالی بگذاری"></label>
+          <label>جهت‌دهی (اختیاری — این متن را مثل سند می‌خوانیم)
+            <textarea id="direction" rows="3" placeholder="مثلاً: این ویدیو برای اینستاگرام است؛ تمرکز روی عدد ۳ دقیقه باشد"></textarea>
+          </label>
+        </div>
+        <div class="summary" id="startSummary"></div>
+        <div class="actions">
+          <button class="primary big" id="startBtn">شروع جاب</button>
+        </div>
+        <div id="queueInfo" hidden></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="bar">
+    <button class="ghost" id="backBtn" disabled>قبلی</button>
+    <small class="bar-hint" id="stepHint">گام ۱ از ۴ — ایجنت</small>
+    <button class="primary" id="nextBtn">بعدی</button>
+  </div>
+</section>
+
+<!-- ═══════════════ ۲. جزئیات جاب ═══════════════ -->
+<section id="build-view" class="view">
+  <div id="emptyBuild" class="empty">
+    <p>جابی باز نیست — از <button class="ghost tiny" data-view="jobs">جاب‌ها</button> یکی را باز کن یا جاب تازه‌ای بساز.</p>
+  </div>
+  <div id="buildBody" hidden>
+    <div class="bv-head">
+      <div>
+        <h2 id="bv-name">—</h2>
+        <div class="meta" id="bv-meta"></div>
+      </div>
+      <div class="bv-actions">
+        <span class="status" id="bv-status"></span>
+        <button class="ghost tiny" id="bv-cancel">لغو</button>
+        <button class="ghost tiny" id="bv-close">بستن</button>
+      </div>
+    </div>
+
+    <div class="progress-card">
+      <div class="pct-row"><b id="bv-pct">۰٪</b><span id="bv-label"></span></div>
+      <div class="progress-track"><div class="progress-fill" id="bv-fill"></div></div>
+      <div class="stage-list" id="bv-stages"></div>
+    </div>
+
+    <!-- دروازهٔ ۱: ویرایش ترنسکریپت -->
+    <div class="panel gate" id="gate-transcript" hidden>
+      <h3>بازبینی ترنسکریپت <small class="gate-tag">دروازهٔ ۱</small></h3>
+      <p class="hint">هر خط را می‌توانی ویرایش کنی — غلط املایی و اشتباه whisper را همین‌جا بگیر. وقت هر خط را که کلیک کنی ویدیو همان‌جا می‌پرد.</p>
+      <div class="tr-tools">
+        <video id="trVideo" controls muted></video>
+      </div>
+      <div class="tr-table" id="trTable"></div>
+      <div class="actions">
+        <button class="ghost" id="trSave">ذخیرهٔ اصلاحات</button>
+        <button class="primary" id="trApprove">تایید و ادامه</button>
+      </div>
+    </div>
+
+    <!-- کارت‌های شناخت و سناریو -->
+    <div class="cards two" id="understandCards" hidden>
+      <div class="panel"><h3>بریف — ویدیو دربارهٔ چیست؟</h3><div id="briefBox" class="kv"></div></div>
+      <div class="panel"><h3>سناریو و استراتژی تدوین</h3><div id="scenarioBox" class="kv"></div></div>
+    </div>
+
+    <!-- دروازهٔ ۲: دمو + چت‌باکس -->
+    <div class="panel gate" id="gate-preview" hidden>
+      <h3>دموی اولیه <small class="gate-tag">دروازهٔ ۲</small></h3>
+      <p class="hint">کم‌حجم و سریع است — فقط برای قضاوت دربارهٔ ادیت. هر تغییری را در چت‌باکس بگو؛ اعمال می‌شود و دموی تازه می‌آید. تا تایید نکنی، خروجی نهایی ساخته نمی‌شود.</p>
+      <div class="preview-grid">
+        <video id="pvVideo" controls playsinline></video>
+        <div class="chat">
+          <div class="chat-log" id="chatLog"></div>
+          <form class="chat-form" id="chatForm">
+            <input id="chatInput" type="text" placeholder="ادیتت را بنویس… مثلاً: تراکم بیشتر / زیرنویس بالاتر / انرژی کمتر" autocomplete="off">
+            <button class="primary" type="submit">فرست</button>
+          </form>
+          <button class="primary big" id="pvApprove">تایید — خروجی نهایی</button>
+        </div>
+      </div>
+      <div class="stills" id="pvStills"></div>
+    </div>
+
+    <!-- خروجی نهایی -->
+    <div class="panel" id="resultPanel" hidden>
+      <h3>خروجی نهایی</h3>
+      <video id="resVideo" controls playsinline></video>
+      <div class="meta" id="resMeta"></div>
+      <div class="actions">
+        <a class="primary" id="resDownload" download>دانلود MP4</a>
+      </div>
+    </div>
+
+    <div class="build-cols">
+      <div class="panel log-panel">
+        <h3>لاگ زنده</h3>
+        <div class="log" id="log"></div>
+      </div>
+      <div class="panel">
+        <h3>آرتیفکت‌ها</h3>
+        <div class="kv" id="artifactBox"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ ۳. جاب‌ها ═══════════════ -->
+<section id="jobs-view" class="view">
+  <h2>جاب‌ها</h2>
+  <div id="jobList" class="job-list"></div>
+</section>
+
+<!-- ═══════════════ ۴. رفرنس‌ها (حافظه) ═══════════════ -->
+<section id="references-view" class="view">
+  <h2>رفرنس‌های یادگرفته‌شده</h2>
+  <p class="lead">هر ویدیوی رفرنس یک بار تحلیل می‌شود و پروفایلش برای همیشه می‌ماند — جاب بعدی با همان سبک بی‌درنگ شروع می‌شود.</p>
+  <div id="refList" class="ref-grid"></div>
+</section>
+
+<!-- ═══════════════ ۵. تنظیمات ═══════════════ -->
+<section id="settings-view" class="view">
+  <h2>تنظیمات</h2>
+  <div class="cards two">
+    <div class="panel">
+      <h3>توان سیستم</h3>
+      <p class="hint">قانون خانه ۵۰٪ است — رندرها هرگز بیشتر از این مقدار CPU نمی‌گیرند.</p>
+      <label class="slider-row"><input type="range" id="cpuSlider" min="10" max="100" step="5" value="50"><b id="cpuPct">۵۰٪</b></label>
+      <div class="kv" id="cpuDetail"></div>
+      <button class="primary" id="cpuSave">ذخیرهٔ توان</button>
+    </div>
+    <div class="panel">
+      <h3>ترنسکریپت</h3>
+      <p class="hint">مدل بزرگ دقیق‌تر است؛ دیفالت large-v3.</p>
+      <div class="kv" id="whisperBox"></div>
+    </div>
+    <div class="panel">
+      <h3>برند استودیو</h3>
+      <p class="hint">توکن‌های پایه — جاب‌ها از رفرنس بازنویسی‌اش می‌کنند.</p>
+      <div class="fields">
+        <label>اکسنت <input type="text" id="brandAccent" placeholder="#55e6a5"></label>
+        <label>پیش‌فرض نسبت <input type="text" id="brandNote" readonly></label>
+      </div>
+      <button class="ghost" id="brandSave">ذخیرهٔ برند</button>
+    </div>
+    <div class="panel">
+      <h3>سرویس‌های API</h3>
+      <div id="providerSettings"></div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<style>
+  .banner { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; justify-content: center; padding: var(--s3) var(--s4); margin: var(--s4) auto; max-width: 720px; border: 1px solid var(--warn); border-radius: var(--r-md); background: var(--warn-dim); color: var(--warn); font-size: 13.5px; text-align: center; }
+  .banner input { width: 90px; background: var(--surface); border: 1px solid var(--hairline); color: var(--ink); border-radius: var(--r-sm); padding: 6px 8px; font: inherit; }
+  .banner code { background: var(--well); padding: 2px 6px; border-radius: 6px; }
+</style>
+
+<!-- مرورگر فایل -->
+<div class="modal" id="browser" hidden>
+  <div class="modal-box">
+    <div class="modal-head">
+      <b id="browserDir"></b>
+      <button class="ghost tiny" id="browserClose">بستن</button>
+    </div>
+    <div class="browser-shortcuts" id="browserShortcuts"></div>
+    <div class="browser-list" id="browserList"></div>
+  </div>
+</div>
+
+<div id="toasts"></div>
+
+<script src="/i18n.js"></script>
+<script src="/engine.js"></script>
+<script src="/app.js"></script>
+</body>
+</html>
