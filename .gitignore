@@ -2,11 +2,14 @@
 # files live under workspace/ and are never committed. Override the location
 # with VIDEO_STUDIO_HOME.
 workspace/
+old/workspace/
 
 # The sound kit is synthesised on first setup (`npm run sfx`) — small files,
 # but a clone stays honest when it builds its own.
 assets/sfx/
 assets/sfx-index.json
+old/assets/sfx/
+old/assets/sfx-index.json
 
 # GSAP is fetched by `npm run vendor` under the GreenSock standard licence and
 # must not be redistributed here. The checksum is pinned in that script.
@@ -15,6 +18,9 @@ assets/sfx-index.json
 node_modules/
 .npm-debug.log*
 
+# Local agent-session state (plans, scratch) — never published.
+.zcode/
+
 .DS_Store
 Thumbs.db
 
@@ -22,3 +28,4 @@ Thumbs.db
 # fetched packs (npm run assets) — both rebuilt with one command. Only
 # lib/assets.mjs (the registry) is committed.
 assets/store/
+old/assets/store/
