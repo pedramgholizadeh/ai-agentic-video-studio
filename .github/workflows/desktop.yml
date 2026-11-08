@@ -15,6 +15,7 @@ permissions:
 jobs:
   build:
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: macos-14
@@ -31,7 +32,6 @@ jobs:
             targets: --win
     runs-on: ${{ matrix.os }}
     timeout-minutes: 45
-    fail-fast: false
 
     steps:
       - uses: actions/checkout@v4
