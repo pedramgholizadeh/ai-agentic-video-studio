@@ -25,6 +25,7 @@
     es: null,
     trCues: [],
     trDirty: false,
+    draftId: null,
     lastGate: null,
   };
 
@@ -96,6 +97,7 @@
     $$('.view').forEach((v) => v.classList.toggle('on', v.id === `${view}-view`));
     $$('.nav-link').forEach((b) => b.classList.toggle('on', b.dataset.view === view));
     if (view === 'jobs') loadJobs();
+    if (view === 'outputs') loadOutputs();
     if (view === 'references') loadReferences();
     if (view === 'settings') {
       loadSettings();
@@ -435,6 +437,20 @@
     }
   }
 
+  /** Continue editing a saved draft: its config pours back into the wizard. */
+  async function openDraft(id) {
+    try {
+      const j = await api(`/api/jobs/${id}`);
+      S.draftId = id;
+      await prefillWizard(j.config);
+      show('new-job');
+      goStep(2);
+      toast('پیش‌نویس باز شد — هر جا خواستی «ذخیرهٔ پیش‌نویس» یا «بزن بریم»');
+    } catch (err) {
+      toast(err.message, 'bad');
+    }
+  }
+
   /* ------------------------------------------------ build view */
 
   async function openJob(id, { switch: sw = false } = {}) {
@@ -747,21 +763,167 @@
 
   /* ------------------------------------------------ jobs + references + settings */
 
+  let jobFilter = 'all';
+
   async function loadJobs() {
     const { jobs } = await api('/api/jobs');
+    const labels = { running: 'در حال ساخته شدن', review: 'منتظر تایید تویه', queued: 'در صف ایجنت', succeeded: 'آماده', failed: 'خطا', cancelled: 'لغو شد', draft: 'پیش‌نویس' };
+    const buckets = { all: jobs, active: jobs.filter((j) => ['running', 'review', 'queued'].includes(j.status)), draft: jobs.filter((j) => j.status === 'draft'), done: jobs.filter((j) => ['succeeded', 'failed', 'cancelled'].includes(j.status)) };
+    const visible = buckets[jobFilter] || jobs;
     $('#jobList').innerHTML =
-      jobs
+      `<div class="filter-row">
+        ${[['all', 'همه'], ['active', 'در جریان'], ['draft', 'پیش‌نویس‌ها'], ['done', 'تمام‌شده‌ها']].map(([k, t]) => `<button class="chip ${jobFilter === k ? 'on' : ''}" data-f="${k}">${t} <small>${fa(buckets[k].length)}</small></button>`).join('')}
+      </div>` +
+      (visible
         .map((j) => {
-          const labels = { running: 'در حال ساخته شدن', review: 'منتظر تایید تویه', queued: 'در صف', succeeded: 'آماده', failed: 'خطا', cancelled: 'لغو', draft: 'پیش‌نویس' };
+          const resumable = ['failed', 'cancelled'].includes(j.status) && j.config?.source?.video;
+          const draftActions =
+            j.status === 'draft'
+              ? `<button class="ghost tiny j-draft" data-id="${esc(j.id)}">ادامهٔ ویرایش</button><button class="ghost tiny j-del" data-id="${esc(j.id)}">حذف</button>`
+              : '';
+          const resume = resumable ? `<button class="ghost tiny j-resume" data-id="${esc(j.id)}">ادامه بده</button>` : '';
           return `
         <div class="job-row" data-id="${esc(j.id)}">
           <span class="name">${esc(j.config?.name || j.id)}</span>
           <span class="meta">${esc(j.id)} · ${esc(labels[j.status] || j.status)}</span>
+          ${draftActions}${resume}
           <span class="pct">${fa(j.progress?.pct ?? 0)}٪</span>
         </div>`;
         })
-        .join('') || '<p class="hint">هنوز جابی نیست — اولین ویدیوت رو بنداز تا ببینیم چی ازش درمیاد 🎬</p>';
-    $$('#jobList .job-row').forEach((r) => r.addEventListener('click', () => openJob(r.dataset.id, { switch: true })));
+        .join('') || '<p class="hint">این دسته خالیه.</p>');
+    $$('#jobList .chip').forEach((c) => c.addEventListener('click', () => { jobFilter = c.dataset.f; loadJobs(); }));
+    $$('#jobList .job-row').forEach((r) => r.addEventListener('click', (e) => { if (!e.target.closest('button')) openJob(r.dataset.id, { switch: true }); }));
+    $$('#jobList .j-draft').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); openDraft(b.dataset.id); }));
+    $$('#jobList .j-del').forEach((b) => b.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      if (!confirm('این پیش‌نویس حذف بشه؟')) return;
+      await api(`/api/jobs/${b.dataset.id}`, { method: 'DELETE' });
+      loadJobs();
+    }));
+    $$('#jobList .j-resume').forEach((b) => b.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      try {
+        await api(`/api/jobs/${b.dataset.id}/start`, { method: 'POST' });
+        toast('ادامه دادم — از همون‌جایی که مونده بود رندر می‌کنه');
+        openJob(b.dataset.id, { switch: true });
+      } catch (err) { toast(err.message, 'bad'); }
+    }));
+  }
+
+  const o_mb = (j) => (j.output?.mb != null ? `${j.output.mb} MB` : mb(j.output?.bytes || 0));
+
+  /* ------- outputs gallery: every finished film stays here ------- */
+
+  async function loadOutputs() {
+    const { jobs } = await api('/api/jobs');
+    const done = jobs.filter((j) => j.status === 'succeeded' && j.output?.file);
+    $('#outputList').innerHTML =
+      done
+        .map(
+          (j) => `
+      <div class="out-card" data-id="${esc(j.id)}">
+        <div class="out-thumb" data-thumb="${esc(j.id)}"></div>
+        <div class="out-body">
+          <b>${esc(j.config?.name || j.id)}</b>
+          <div class="meta">${esc((j.finishedAt || '').slice(0, 10))} · ${esc(j.config?.output?.ratio || '')} · ${esc(o_mb(j))} · ${esc(hhmmss(j.output?.duration || 0))}</div>
+          <div class="out-actions">
+            <a class="primary tiny" href="${ENGINE.url(`/api/jobs/${j.id}/download`)}">دانلود</a>
+            <button class="ghost tiny o-open">باز کردن جاب</button>
+            <button class="ghost tiny o-remix" data-id="${esc(j.id)}">ساخت با همین تنظیمات</button>
+          </div>
+        </div>
+      </div>`,
+        )
+        .join('') || '<p class="hint">هنوز خروجی‌ای نداری — اولین ویدیو که کامل شد اینجا جا می‌گیره 🎬</p>';
+    // thumbnails: the job's first review still, if it exists
+    for (const j of done) {
+      try {
+        const { stills } = await api(`/api/jobs/${j.id}/stills`);
+        if (stills.length) {
+          document.querySelector(`.out-thumb[data-thumb="${j.id}"]`).innerHTML =
+            `<img src="${ENGINE.url(`/api/jobs/${j.id}/still?name=${encodeURIComponent(stills[0])}`)}" alt="">`;
+        }
+      } catch { /* a job without stills keeps the placeholder */ }
+    }
+    $$('#outputList .out-card').forEach((c) => c.addEventListener('click', (e) => { if (!e.target.closest('button, a')) openJob(c.dataset.id, { switch: true }); }));
+    $$('#outputList .o-open').forEach((b) => b.addEventListener('click', (e) => { e.stopPropagation(); const c = b.closest('.out-card'); openJob(c.dataset.id, { switch: true }); }));
+    $$('#outputList .o-remix').forEach((b) => b.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      try {
+        const j = await api(`/api/jobs/${b.dataset.id}`);
+        await prefillWizard(j.config);
+        show('new-job');
+        goStep(2);
+        toast('تنظیمات این ویدیو رفت توی ویزارد — رفرنس و ویدیو رو چک کن و بزن بریم');
+      } catch (err) { toast(err.message, 'bad'); }
+    }));
+  }
+
+  /** Pour a previous job's config back into the wizard (remix). */
+  async function prefillWizard(cfg = {}) {
+    if (cfg.source?.video) { S.src.video = cfg.source.video; await setSource('video', cfg.source.video).catch(() => {}); }
+    if (cfg.source?.reference) { S.src.reference = cfg.source.reference; await setSource('reference', cfg.source.reference).catch(() => {}); }
+    if (cfg.source?.logo) $('#logoPath').value = cfg.source.logo;
+    if (cfg.output?.ratio) { S.ratio = cfg.output.ratio; paintRatios(); }
+    if (cfg.sound) { S.sound = { sfx: cfg.sound.sfx !== false, level: cfg.sound.level || 'balanced' }; paintSound(); }
+    if (cfg.output?.quality) $('#quality').value = cfg.output.quality;
+    if (cfg.output?.maxMb) $('#maxMb').value = cfg.output.maxMb;
+    if (cfg.transcribe?.model && $('#whisperModel').querySelector(`option[value="${cfg.transcribe.model}"]`)) $('#whisperModel').value = cfg.transcribe.model;
+    if (cfg.direction?.text) $('#direction').value = cfg.direction.text;
+    if (cfg.name) $('#jobName').value = `${cfg.name} — نسخهٔ دو`;
+    if (cfg.engine) {
+      if (cfg.engine.mode === 'agent' && cfg.engine.agent && cfg.engine.agent !== 'studio') S.agent = { kind: 'cli', id: cfg.engine.agent };
+      else if (cfg.engine.mode === 'provider') { S.agent = { kind: 'api', id: cfg.engine.provider || 'openrouter' }; S.provider = cfg.engine.provider || 'openrouter'; }
+      else if (cfg.engine.mode === 'studio') S.agent = { kind: 'cli', id: 'studio' };
+      paintAgents();
+    }
+    paintStartSummary();
+  }
+
+  /** Save the wizard as a draft — resumable from جاب‌ها. */
+  async function saveDraft() {
+    if (!S.src.video) return toast('برای پیش‌نویس حداقل ویدیوی خودت لازمه (گام ۲).', 'bad');
+    try {
+      const body = {
+        name: $('#jobName').value.trim() || `${S.src.video.split('/').pop().replace(/\.[^.]+$/, '')} — پیش‌نویس`,
+        source: { video: S.src.video, reference: S.src.reference, logo: $('#logoPath').value.trim() || null },
+        output: { ratio: S.ratio, quality: $('#quality').value, maxMb: Number($('#maxMb').value) || 200, fps: 30 },
+        sound: S.sound,
+        transcribe: { model: $('#whisperModel').value || 'large-v3', language: 'fa' },
+        engine:
+          S.agent.kind === 'api'
+            ? { mode: 'provider', provider: S.provider, model: $('#providerModel').value.trim() || null }
+            : S.agent.id === 'studio'
+              ? { mode: 'studio' }
+              : { mode: 'agent', agent: S.agent.id },
+        direction: { text: $('#direction').value.trim() },
+        cpu: { pct: S.cfg.cpu?.pct ?? 50 },
+      };
+      if (S.draftId) {
+        await api(`/api/jobs/${S.draftId}/config`, { method: 'PUT', body: { config: body } });
+        toast('پیش‌نویس به‌روز شد ✓');
+      } else {
+        const job = await api('/api/jobs', { method: 'POST', body });
+        S.draftId = job.id;
+        toast('پیش‌نویس ذخیره شد — از «جاب‌ها» هر وقت خواستی ادامه بده ✓');
+      }
+    } catch (err) {
+      toast(err.message, 'bad');
+    }
+  }
+
+  /** Continue editing a saved draft: its config pours back into the wizard. */
+  async function openDraft(id) {
+    try {
+      const j = await api(`/api/jobs/${id}`);
+      S.draftId = id;
+      await prefillWizard(j.config);
+      show('new-job');
+      goStep(2);
+      toast('پیش‌نویس باز شد — هر جا خواستی «ذخیرهٔ پیش‌نویس» یا «بزن بریم»');
+    } catch (err) {
+      toast(err.message, 'bad');
+    }
   }
 
   async function loadReferences() {
@@ -1040,7 +1202,8 @@
     });
     $('#backBtn').addEventListener('click', () => goStep(S.step - 1));
     $('#nextBtn').addEventListener('click', () => (S.step === 4 ? startJob() : goStep(S.step + 1)));
-    $('#startBtn').addEventListener('click', startJob);
+    $('#startBtn').addEventListener('click', () => { S.draftId = null; startJob(); });
+    $('#draftBtn').addEventListener('click', saveDraft);
 
     // source slots: pick + drag & drop
     $$('.card.source .slot').forEach((slot) => {

@@ -339,6 +339,19 @@ async function api(req, res, url) {
     return json(res, 200, { jobs: jobs.list() });
   }
 
+  if (seg[1] === 'jobs' && seg[2] && seg[3] === 'config' && req.method === 'PUT') {
+    // drafts only: a saved-not-started job keeps its setup editable
+    const id = seg[2];
+    const job = jobs.get(id);
+    if (!job) return fail(res, 404, 'جاب پیدا نشد');
+    if (job.status !== 'draft') return fail(res, 409, 'فقط پیش‌نویس‌ها قابل ویرایش‌اند — جاب‌های شروع‌شده قفل‌اند.');
+    const { config } = await readJson(req);
+    if (!config || typeof config !== 'object') return fail(res, 400, 'config نامعتبر است');
+    jobs.patch(id, { config: deepMergeConfig(job.config, config), updatedAt: new Date().toISOString() });
+    jobs.appendLog(id, 'info', 'پیش‌نویس به‌روز شد');
+    return json(res, 200, jobs.get(id));
+  }
+
   if (seg[0] === 'api' && seg[1] === 'jobs' && seg.length === 3 && req.method === 'GET') {
     const job = jobs.get(seg[2]);
     return job ? json(res, 200, job) : fail(res, 404, 'جاب پیدا نشد');

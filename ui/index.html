@@ -24,6 +24,7 @@
   </a>
   <nav class="nav">
     <button class="nav-link on" data-view="new-job">جاب جدید</button>
+    <button class="nav-link" data-view="outputs">خروجی‌ها</button>
     <button class="nav-link" data-view="jobs">جاب‌ها</button>
     <button class="nav-link" data-view="references">رفرنس‌ها</button>
     <button class="nav-link" data-view="settings">تنظیمات</button>
@@ -128,7 +129,9 @@
         <div class="summary" id="startSummary"></div>
         <div class="actions">
           <button class="primary big" id="startBtn">بزن بریم 🚀</button>
+          <button class="ghost" id="draftBtn">ذخیرهٔ پیش‌نویس — بعداً ادامه بده</button>
         </div>
+        <p class="step-tip">پیش‌نویس همه‌ی تنظیمات رو روی همین دستگاه نگه می‌داره؛ از <b>جاب‌ها</b> هر وقت خواستی دقیقاً ادامه‌ش می‌دی.</p>
         <div id="queueInfo" hidden></div>
       </div>
     </div>
@@ -236,6 +239,13 @@
 <section id="jobs-view" class="view">
   <h2>جاب‌ها</h2>
   <div id="jobList" class="job-list"><p class="hint" data-empty-jobs>هنوز جابی نیست — اولین ویدیوت رو بنداز تا ببینیم چی ازش درمیاد 🎬</p></div>
+</section>
+
+<!-- ═══════════════ ۳.۵ خروجی‌ها (گالری) ═══════════════ -->
+<section id="outputs-view" class="view">
+  <h2>خروجی‌ها</h2>
+  <p class="lead">هر ویدیویی که کامل شده اینجا می‌مونه — دانلودش کن، دوباره ببینش، یا با همون تنظیمات یکی جدید بساز.</p>
+  <div id="outputList" class="out-grid"></div>
 </section>
 
 <!-- ═══════════════ ۴. رفرنس‌ها (حافظه) ═══════════════ -->
