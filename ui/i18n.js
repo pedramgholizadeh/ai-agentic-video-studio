@@ -451,7 +451,21 @@
   "مدل ناشناخته است": "unknown model",
   "پیش‌فرض ترنسکریپت شد ✓": "is now the transcription default ✓",
   "حذف شد — فضا آزاد شد": "deleted — space freed",
-  "فقط انگلیسی": "English-only"
+  "فقط انگلیسی": "English-only",
+  "داخل اپ چطوریه؟": "A look inside the app",
+  "چه کارهایی برات می‌کنه؟": "What it does for you",
+  "مسیر هر جاب": "Every job walks this path",
+  "نصب — قدم به قدم": "Install — step by step",
+  "چند تا سوال پرتکرار": "FAQ",
+  "مشارکت در توسعه": "Contribute",
+  "دانلود اپلیکیشن": "Download the app",
+  "بزن بریم 🚀": "Let's go 🚀",
+  "ذخیرهٔ پیش‌نویس — بعداً ادامه بده": "Save draft — continue later",
+  "بریم بعدی": "Next",
+  "اول بگو کی ادیت رو انجام بده؟": "First — who does the edit?",
+  "حالا دو تا فایل ورودی": "Now the two input files",
+  "خروجی چطوری باشه؟": "How should the output look?",
+  "یه نگاه بنداز، بزن بریم": "Take a look, hit go"
 };
 
   /* Word-level table for interpolated text. Deliberately small and specific:

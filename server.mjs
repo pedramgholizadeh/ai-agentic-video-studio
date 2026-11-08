@@ -619,11 +619,12 @@ function serveStatic(req, res, url) {
   // strip the leading slash BEFORE resolving: path.resolve would treat an
   // absolute rel as a filesystem-root path and escape the ui/ sandbox
   let rel = decodeURIComponent(url.pathname).replace(/^\/+/, '');
-  if (rel === '') rel = 'index.html';
+  // the engine's root is the panel; the landing (index.html) is the public face
+  if (rel === '' || rel === 'index.html') rel = 'panel.html';
   const file = inside(UI, rel);
   if (!file || !fs.existsSync(file) || !fs.statSync(file).isFile()) {
     // a panel route that does not exist falls back to the app itself
-    if (!rel.includes('.')) return streamFile(req, res, path.join(UI, 'index.html'));
+    if (!rel.includes('.')) return streamFile(req, res, path.join(UI, 'panel.html'));
     return fail(res, 404, 'not found');
   }
   streamFile(req, res, file);

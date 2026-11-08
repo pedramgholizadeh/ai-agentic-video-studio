@@ -4,7 +4,7 @@
 
 [![Desktop builds](https://img.shields.io/github/actions/workflow/status/pedramgholizadeh/ai-agentic-video-studio/desktop.yml?label=%D8%A8%DB%8C%D9%84%D8%AF%20%D8%AF%D8%B3%DA%A9%D8%AA%D8%A7%D9%BE&logo=github&logoColor=white)](https://github.com/pedramgholizadeh/ai-agentic-video-studio/actions/workflows/desktop.yml)
 [![Latest release](https://img.shields.io/github/v/release/pedramgholizadeh/ai-agentic-video-studio?include_prereleases&label=%D8%A2%D8%AE%D8%B1%DB%8C%D9%86%20%D9%86%D8%B3%D8%AE%D9%87)](https://github.com/pedramgholizadeh/ai-agentic-video-studio/releases/latest)
-[![Pages](https://img.shields.io/github/deployments/pedramgholizadeh/ai-agentic-video-studio/github-pages?label=%D9%84%D9%86%D8%AF%DB%8C%D9%86%DA%AF)](https://pedramgholizadeh.github.io/ai-agentic-video-studio/download.html)
+[![Pages](https://img.shields.io/github/deployments/pedramgholizadeh/ai-agentic-video-studio/github-pages?label=%D9%84%D9%86%D8%AF%DB%8C%D9%86%DA%AF)](https://pedramgholizadeh.github.io/ai-agentic-video-studio/)
 ![Zero deps](https://img.shields.io/badge/%D9%88%D8%A7%D8%A8%D8%B3%D8%AA%DA%AF%DB%8C-%D8%B5%D9%81%D8%B1-success)
 [![Built by Pedram Gholizadeh](https://img.shields.io/badge/%D8%B3%D8%A7%D8%B2%D9%86%D8%AF%D9%87-Pedram%20Gholizadeh-55e6a5)](https://github.com/pedramgholizadeh)
 
@@ -16,7 +16,7 @@
 صداگذاری — تحویل داده می‌شود. هیچ وابستگی npm در زمان اجرا؛ همه‌چیز روی همین
 کامپیوتر.
 
-📄 <a href="https://pedramgholizadeh.github.io/ai-agentic-video-studio/download.html">لندینگ و دانلود</a>
+📄 <a href="https://pedramgholizadeh.github.io/ai-agentic-video-studio/">لندینگ و دانلود</a>
 · 💬 <a href="#%D8%A7%D8%B2-%D8%AA%D8%B1%D9%85%DB%8C%D9%86%D8%A7%D9%84--from-the-terminal">پنل وب</a>
 · 🇬🇧 <a href="#video-studio--english">English below</a>
 
@@ -126,7 +126,7 @@ stays on this machine.
   through the cool-render wrapper; on-screen copy only from the transcript;
   one brand token set; Vazirmatn for every Persian word; WebM alpha and
   platform safe-rect invariants enforced.
-- **Landing page** — [pedramgholizadeh.github.io/ai-agentic-video-studio/download.html](https://pedramgholizadeh.github.io/ai-agentic-video-studio/download.html)
+- **Landing page** — [pedramgholizadeh.github.io/ai-agentic-video-studio/download.html](https://pedramgholizadeh.github.io/ai-agentic-video-studio/)
   with live download links from the latest release.
 
 **Built by Pedram Gholizadeh (پدرام قلی‌زاده) — design & development.**
