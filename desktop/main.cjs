@@ -62,6 +62,21 @@ function waitHealthy(port, tries = 120) {
 let server = null;
 let mainWindow = null;
 
+/** Kill the server AND its whole process tree — renders and ffmpeg children
+ * must never outlive the app. POSIX: a detached process group; Windows: taskkill /T. */
+function killServer() {
+  if (!server) return;
+  try {
+    if (process.platform === 'win32') {
+      spawn('taskkill', ['/pid', String(server.pid), '/T', '/F'], { stdio: 'ignore' });
+    } else {
+      try { process.kill(-server.pid, 'SIGTERM'); } catch { server.kill('SIGTERM'); }
+      setTimeout(() => { try { process.kill(-server.pid, 'SIGKILL'); } catch {} }, 1500);
+    }
+  } catch {}
+  server = null;
+}
+
 function startServer(port) {
   fs.mkdirSync(LOG_DIR, { recursive: true });
   const log = fs.openSync(LOG_FILE, 'a');
@@ -69,6 +84,7 @@ function startServer(port) {
   // the Electron binary runs plain-Node when ELECTRON_RUN_AS_NODE is set —
   // the studio needs nothing but itself
   server = spawn(process.execPath, [path.join(STUDIO_DIR, 'server.mjs')], {
+    detached: process.platform !== 'win32', // its own process group, so the tree dies with the app
     env: {
       ...process.env,
       ELECTRON_RUN_AS_NODE: '1',
@@ -94,7 +110,7 @@ function startServer(port) {
 }
 
 function relaunch() {
-  if (server) { try { server.kill(); } catch {} server = null; }
+  killServer();
   app.relaunch();
   app.exit(0);
 }
@@ -104,11 +120,6 @@ function sendUpdateStatus(status) {
 }
 
 function wireUpdater() {
-  ipcMain.handle('update:check', async () => {
-    const r = await autoUpdater.checkForUpdates();
-    return { version: r?.updateInfo?.version || null };
-  });
-  ipcMain.on('update:install', () => autoUpdater.quitAndInstall());
   autoUpdater.autoDownload = true;
   autoUpdater.autoInstallOnAppQuit = true;
   autoUpdater.on('checking-for-update', () => sendUpdateStatus({ status: 'checking' }));
@@ -197,6 +208,13 @@ if (!gotLock) {
   });
 
   app.whenReady().then(async () => {
+    // the panel's update button works everywhere; the updater itself only in packaged builds
+    ipcMain.handle('update:check', async () => {
+      if (isDev) throw new Error('در حالت توسعه، به‌روزرسان غیرفعال است — بیلد منتشرشده را امتحان کن.');
+      const r = await autoUpdater.checkForUpdates();
+      return { version: r?.updateInfo?.version || null };
+    });
+    ipcMain.on('update:install', () => { if (!isDev) autoUpdater.quitAndInstall(); });
     app.setAboutPanelOptions({
       applicationName: 'استودیو ویدیو — Video Studio',
       applicationVersion: app.getVersion(),

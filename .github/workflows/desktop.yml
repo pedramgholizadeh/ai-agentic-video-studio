@@ -98,7 +98,18 @@ jobs:
         if: failure()
         working-directory: desktop
         shell: bash
-        run: grep -aiE "⨯|error|fail|cannot|exit code" build.log | tail -12 | while IFS= read -r line; do echo "::error::${line:0:200}"; done
+        run: |
+          echo "── build.log tail (also uploaded as an artifact) ──"
+          tail -40 build.log
+          tail -30 build.log | while IFS= read -r line; do echo "::error::${line:0:220}"; done
+
+      - name: Upload build log on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-log-${{ matrix.platform }}
+          path: desktop/build.log
+          if-no-files-found: ignore
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

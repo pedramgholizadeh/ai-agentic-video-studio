@@ -1,131 +1,134 @@
+<div dir="rtl">
+
 # استودیو ویدیو — Video Studio
 
-یک استودیوی تدوینِ محلی: **دو فایل بده — ویدیوی خودت + یک ویدیوی رفرنس —** و
-استودیو تا خروجی نهایی می‌رود. پنل وب جاب‌ها را صف می‌کند، ایجنتِ انتخابی تو
-(یا موتور قطعی خود استودیو) آن را می‌سازد و مرورگر همان لحظه پیشرفت را نشان
-می‌دهد. بدون هیچ وابستگی npm در زمان اجرا؛ همه‌چیز روی همین کامپیوتر.
+[![Desktop builds](https://img.shields.io/github/actions/workflow/status/pedramgholizadeh/ai-agentic-video-studio/desktop.yml?label=%D8%A8%DB%8C%D9%84%D8%AF%20%D8%AF%D8%B3%DA%A9%D8%AA%D8%A7%D9%BE&logo=github&logoColor=white)](https://github.com/pedramgholizadeh/ai-agentic-video-studio/actions/workflows/desktop.yml)
+[![Latest release](https://img.shields.io/github/v/release/pedramgholizadeh/ai-agentic-video-studio?include_prereleases&label=%D8%A2%D8%AE%D8%B1%DB%8C%D9%86%20%D9%86%D8%B3%D8%AE%D9%87)](https://github.com/pedramgholizadeh/ai-agentic-video-studio/releases/latest)
+[![Pages](https://img.shields.io/github/deployments/pedramgholizadeh/ai-agentic-video-studio/github-pages?label=%D9%84%D9%86%D8%AF%DB%8C%D9%86%DA%AF)](https://pedramgholizadeh.github.io/ai-agentic-video-studio/download.html)
+![Zero deps](https://img.shields.io/badge/%D9%88%D8%A7%D8%A8%D8%B3%D8%AA%DA%AF%DB%8C-%D8%B5%D9%81%D8%B1-success)
+[![Built by Pedram Gholizadeh](https://img.shields.io/badge/%D8%B3%D8%A7%D8%B2%D9%86%D8%AF%D9%87-Pedram%20Gholizadeh-55e6a5)](https://github.com/pedramgholizadeh)
 
-A local re-edit studio: hand it **two files — your video plus a reference
-video** — and it carries the job to a finished cut. The web panel queues jobs;
-the agent you picked at stage zero (or the studio's own deterministic engine)
-builds them while the browser streams the progress. Zero runtime npm
-dependencies; everything stays on this machine.
+**دو فایل بده — ویدیوی خودت و یک ویدیوی رفرنس — یک تدوین بگیر.**
 
-## پایپ‌لاین — The pipeline
+یک استودیوی تدوینِ محلی که با هوش مصنوعی کار می‌کند: صدای فیلمت با whisper
+پیاده می‌شود، متنش فهمیده می‌شود، سبکِ رفرنس پیکسل‌پرفکت یاد گرفته می‌شود و
+خروجی نهایی ۳۰ فریم — با زیرنویس کلمه‌به‌کلمهٔ فارسی (Vazirmatn)، موشن و
+صداگذاری — تحویل داده می‌شود. هیچ وابستگی npm در زمان اجرا؛ همه‌چیز روی همین
+کامپیوتر.
+
+📄 <a href="https://pedramgholizadeh.github.io/ai-agentic-video-studio/download.html">لندینگ و دانلود</a>
+· 💬 <a href="#%D8%A7%D8%B2-%D8%AA%D8%B1%D9%85%DB%8C%D9%86%D8%A7%D9%84--from-the-terminal">پنل وب</a>
+· 🇬🇧 <a href="#video-studio--english">English below</a>
+
+## اپلیکیشن دسکتاپ (بتا)
+
+| | |
+|---|---|
+| ⬇️ **macOS (Apple Silicon)** | [دریافت آخرین dmg](https://github.com/pedramgholizadeh/ai-agentic-video-studio/releases/latest) |
+| ⬇️ **Windows x64** | [دریافت آخرین Installer](https://github.com/pedramgholizadeh/ai-agentic-video-studio/releases/latest) |
+| 🔄 **آپدیت درون‌برنامه‌ای** | خودکار از GitHub Releases + دکمهٔ «بررسی به‌روزرسانی» در تنظیمات |
+| 🧩 **داخل بسته** | Node + npm/npx + ffmpeg/ffprobe + موتور و پنل — چیزی نصب نمی‌کنی |
+| 🔑 **تنظیمات خودت** | کلیدهای API (openrouter / z.ai / paasta.cloud)، انتخاب ایجنت، مدل whisper، توان CPU |
+| 👤 **ساختهٔ** | پدرام قلی‌زاده — Pedram Gholizadeh |
+
+نکات بتا: امضای دیجیتال ندارد — macOS: اولین اجرا راست‌کلیک → Open؛ Windows:
+SmartScreen → More info → Run anyway. اولین رندر، Chrome headless و رانتایم
+whisper را یک‌بار دانلود می‌کند و مدل‌ها از خود تنظیمات اپ می‌آیند.
+
+## پایپ‌لاین
 
 ```
 prepare → transcribe → review → understand → reference → assets → strategy
         → scaffold → preview → (حلقهٔ ادیت چت) → final → verify
 ```
 
-1. **transcribe** — صدای ویدیوی تو با whisper جدا و پیاده می‌شود (دیفالت
-   `large-v3`، زبان فارسی؛ «خیلی خیلی دقت» قانون این استیج است).
-2. **review** — دروازهٔ اول: جدول خط‌به‌خط ترنسکریپت، هر خط قابل ویرایش، کلیک روی
-   زمان = پرش ویدیو. غلط املایی را خودت همین‌جا می‌گیری.
-3. **understand** — متن کامل خوانده و فهمیده می‌شود؛ `brief.json` با
-   موضوع/تز/قوس روایت و `facts[]` که فقط کلمات خودِ ترنسکریپت‌اند.
-4. **reference** — رفرنس پیکسل‌پرفکت تحلیل می‌شود: ریتم کات‌ها، انرژی حرکت،
-   پالت، ترنزیشن‌ها، جانمایی کپشن. هر رفرنس **یک بار** تحلیل و برای همیشه در
-   `workspace/references/` (با کلید SHA-1) یاد می‌ماند — دفعهٔ بعد همین فایل را
-   بدهی، پنل خودش پیشنهادش را می‌دهد و پروفایل بی‌درنگ برمی‌گردد.
-5. **assets** — کیت افکت صدا، فونت‌ها (Vazirmatn)، texture ها و اسلات لوگو.
-6. **strategy** — سناریو و استراتژی تدوین: بیت‌ها روی ریتم رفرنس با بریف و برند
-   چیده می‌شوند (`scenario.md`).
-7. **preview** — دموی اولیهٔ خیلی کم‌حجم (۱۵fps، ۶۴۰px). در **چت‌باکس** ادیت
-   بده — «تراکم بیشتر»، «زیرنویس بالاتر»، «انرژی کمتر»، «خط ۳: …» — اعمال
-   می‌شود و دموی تازه می‌آید. تا تایید نکنی، هیچ خروجی نهایی‌ای ساخته نمی‌شود.
-8. **final → verify** — رندر کامل ۳۰fps، کامپوزیت لایهٔ موشن + افکت‌ها (+ لوگو)
-   روی ویدیوی تو، خروجی H.264 در **1920×1080 (۱۶:۹، دیفالت)** یا **1080×1920
-   (۹:۱۶)** با گارد سقف حجم و راستی‌آزمایی ffprobe.
+1. **transcribe** — whisper `large-v3` آفلاین، زبان فارسی؛ دقت قانون این استیج است.
+2. **review** — دروازهٔ اول: جدول خط‌به‌خط، هر خط قابل ویرایش، کلیک روی زمان = پرش ویدیو.
+3. **understand** — `brief.json`: موضوع/تز/قوس/مخاطب؛ facts فقط از خود گفتار.
+4. **reference** — تحلیل پیکسل‌پرفکت رفرنس (ریتم کات، انرژی، پالت، ترنزیشن) و
+   **حافظهٔ دائمی** با کلید SHA-1 — دفعهٔ بعد خودش پیشنهادش را می‌دهد.
+5. **strategy** — سناریو و بیت‌ها روی ریتم رفرنس؛ متن کارت‌ها فقط واژه‌های گفته‌شده.
+6. **preview + چت** — دموی کم‌حجم ۶۴۰px؛ «تراکم بیشتر»، «زیرنویس بالاتر»، «خط ۳: …»
+   در چت‌باکس — اعمال و دموی تازه. تا تایید تو، خروجی نهایی‌ای ساخته نمی‌شود.
+7. **final → verify** — کامپوزیت ۱۰۸۰×۱۹۲۰ یا ۱۹۲۰×۱۰۸۰ @30fps با گارد حجم و
+   راستی‌آزمایی ffprobe.
 
-همهٔ کلمات فارسی روی تصویر با فونت **Vazirmatn** رندر می‌شوند.
+## شروع سریع — اپ دسکتاپ
 
-## راه‌اندازی — Setup
-
-```sh
-npm run setup      # کیت افکت صدا + GSAP (پین‌شده با SHA-256)
-npm run models     # مدل آفلاین whisper (دیفالت large-v3، ~۲.۹GB)
-npm run doctor     # باید با «Required tools are present» تمام شود
-npm start          # پنل روی http://127.0.0.1:8790 (فقط لوکال)
-```
-
-نیازمندی‌ها: Node ≥ 20 و ffmpeg/ffprobe روی PATH.
-
-## مرحلهٔ صفر: چه کسی ادیت کند؟
-
-در گام اول ویزارد، ایجنت را انتخاب می‌کنی:
-
-- **CLI ایجنت‌ها** — opencode، zcode، claude code، codex: اگر نصب باشند پنل
-  خودش headless روی جاب اجرایشان می‌کند (HANDOFF.md را می‌خوانند و تا خروجی
-  می‌روند)؛ اگر نباشند دستور wake می‌گیری.
-- **مغز API** — openrouter، z.ai (GLM)، paasta.cloud: مراحل هوشمند (درک متن،
-  سناریو) با مدل انتخابی؛ رندر همیشه محلی.
-- **خودِ استودیو** — بدون هیچ مدلی، با قوانین قطعی خانه.
-
-## توان سیستم — Machine power
-
-تنظیمات ← «توان سیستم»: اسلایدر ۱۰ تا ۱۰۰٪ (قانون خانه: **۵۰٪**). همهٔ رندرها
-از wrapperی `tools/cool-render/cool-run` می‌گذرند و هرگز بیشتر از همین عدد CPU
-نمی‌گیرند؛ تعداد ورکرها هم از همین بودجه حساب می‌شود، هرگز `auto`.
+۱. نصب‌کننده را از [آخرین Release](https://github.com/pedramgholizadeh/ai-agentic-video-studio/releases/latest) بگیر.
+۲. اجرا کن؛ در تنظیمات مدل whisper و کلیدهای API خودت را بگذار.
+۳. دو فایل بده، ایجنت را انتخاب کن، Start.
 
 ## از ترمینال — From the terminal
 
 ```sh
-node cli.mjs list | next | claim | wait | log | progress | show | done | fail | power
-node scripts/motion.mjs refprofile|brief|brand|beats|write|sfx|final|collage|inspect|…
+npm run setup && npm run models && npm run doctor && npm start   # → http://127.0.0.1:8790
 ```
 
-قرارداد کامل برای ایجنت‌ها: [AGENTS.md](AGENTS.md).
+- نیازمندی‌ها: Node ≥ 20 و ffmpeg/ffprobe روی PATH (اپ دسکتاپ هر دو را داخل خودش دارد).
+- قرارداد کامل ایجنت‌ها: [AGENTS.md](AGENTS.md) · اسکیل: `.agents/skills/studio-queue/`
+- موتور خط فرمان: `node scripts/motion.mjs refprofile|brief|brand|beats|write|sfx|final|inspect`
 
-## اپلیکیشن دسکتاپ — The desktop app (beta)
+## قوانین سخت
 
-استودیو به‌صورت اپلیکیشن بومی هم عرضه می‌شود — **macOS (dmg)** و **Windows
-(NSIS installer)** — ساخته‌شده با GitHub Actions. داخل بسته همه‌چیز هست:
-**node و npm و npx**، **ffmpeg و ffprobe**، موتور استودیو و پنل. پیش‌نیاز
-بیرونی فقط اینترنت است (اولین رندر، Chrome headless و رانتایم whisper را
-یک‌بار دانلود می‌کند) و مدل‌های whisper از خود تنظیماتِ اپ دانلود می‌شوند.
+- **توان**: هر رندر از wrapper می‌گذرد و روی درصد تنظیم‌شده (دیفالت ۵۰٪) قفل است؛ ورکر هرگز `auto` نیست.
+- **مقدس بودن facts**: متنِ روی تصویر فقط از ترنسکریپت یا جهت‌دهی خودت.
+- **یک ست توکن برند** برای کل فیلم؛ **فقط Vazirmatn** برای هر واژهٔ فارسی.
+- **آلفای WebM**: `slim` نه `fit-size`، بدون `--max-bitrate`، و `-c:v libvpx-vp9` قبل از `-i` لایه.
+- **حاشیهٔ امن پلتفرم** برای ۹:۱۶ و ۱۶:۹ (lib/safe.mjs).
 
-- **نسخه‌گذاری بتا**: `1.0.0-beta.<شناسهٔ کامیت>` — هر بیلد به کامیت خودش
-  بنشیند.
-- **آپدیت درون‌برنامه‌ای**: اپ از **GitHub Releases** چک می‌کند (خودکار در
-  شروع و هر ۶ ساعت، و با دکمهٔ «بررسی به‌روزرسانی» در تنظیمات)؛ دانلود
-  خودکار و نصب با یک کلیک.
-- **بخش درباره**: فارسی و انگلیسی — سازنده، نسخه و لینک ریپو.
+## معماری
 
-ساختن و نصب:
+| مسیر | چیست |
+|---|---|
+| `server.mjs` | پنل + صف + API (فقط 127.0.0.1) |
+| `lib/runner.mjs` | پایپ‌لاین استودیو با دو دروازهٔ بازبینی |
+| `lib/references.mjs` | حافظهٔ رفرنس (SHA-1-keyed) |
+| `lib/chat.mjs` | چت‌باکس ادیت‌های فارسی + اینتنت‌ها |
+| `lib/agents.mjs` | انتخاب ایجنت مرحلهٔ صفر + اسپاون headless |
+| `desktop/` | شل اپلیکیشن (Electron) + آپدیتر GitHub Releases |
+| `old/` | استودیوی قبلی (سازندهٔ لایهٔ موشن) — منجمد و قابل اجرا |
 
-1. از تب **Actions** ریپو، workflow «Desktop app (macOS + Windows)» را با
-   پوشِ تگ اجرا کن (`git tag v1.0.0-beta.<sha> && git push origin <tag>`) —
-   یا دستی (workflow_dispatch) و فایل‌ها را از artifacts بردار.
-2. تگ‌ها یک **Release** با نصب‌کننده‌ها و چک‌سام می‌سازند؛ همان Release منبع
-   آپدیتر درون‌برنامه‌ای است.
-3. نصب: mac — dmg را باز و اپ را در Applications بگذار (اولین اجرا: راست‌کلیک
-   → Open، چون بتا امضاشده نیست). Windows — Setup.exe را اجرا کن
-   (SmartScreen: More info → Run anyway).
+## لایسنس و سیاست
 
-نکتهٔ فنی: شل دسکتاپ (`desktop/`) سرورِ همان استودیو را با باینری Electron در
-حالت `ELECTRON_RUN_AS_NODE` اجرا می‌کند و پنل را داخل پنجرهٔ خودش نشان می‌دهد —
-همان پنل، همان موتور، همان قوانین توان.
+کد MIT؛ موتور رندر HyperFrames (Apache-2.0) از راه npx؛ GSAP فقط vendored.
+جزئیات: [NOTICE.md](NOTICE.md) · [SECURITY.md](SECURITY.md) · [CONTRIBUTING.md](CONTRIBUTING.md)
 
-## پنل منتشرشده — The hosted panel
+---
 
-`ui/` روی GitHub Pages هم منتشر می‌شود (workflow ریپو). نسخهٔ میزبان بدون موتور
-است؛ با موتورِ روی کامپیوتر خودت (`node server.mjs --allow-origin pages`) از
-راه پل loopback (`ui/engine.js`) حرف می‌زند و گرنه بنر «موتور روشن نیست»
-نشان می‌دهد.
+</div>
 
-## زبان — Language
+# Video Studio — English
 
-پنل دوزبانه است؛ **دیفالت فارسی** و انگلیسی با دکمهٔ بالای صفحه. اصطلاحات فنی
-فارسی‌نویسی می‌شوند: جاب، اسکیل، ایجنت، رندر، رفرنس، بریف.
+**Two files in — your video and a reference video — one finished edit out.**
 
-## استودیوی قبلی
+A local AI re-edit studio: the audio is transcribed with offline whisper
+(`large-v3`, Persian), the text is understood into a brief, the reference
+video's style is analysed pixel-perfect and remembered forever, and the final
+cut renders at 30 fps with word-by-word Persian subtitles (Vazirmatn), motion
+graphics and measured sound design. Zero runtime npm dependencies — everything
+stays on this machine.
 
-استودیوی قبلی (سازندهٔ لایهٔ موشن شفاف با ورودی SRT) سالم و قابل اجرا در
-[`old/`](old/) زندگی می‌کند — `node old/server.mjs`.
+- **Desktop app (beta)** — macOS dmg & Windows NSIS from
+  [GitHub Releases](https://github.com/pedramgholizadeh/ai-agentic-video-studio/releases/latest),
+  built by [Actions](https://github.com/pedramgholizadeh/ai-agentic-video-studio/actions/workflows/desktop.yml),
+  with **in-app updates** pulled from releases. The shell bundles Node, npm/npx,
+  ffmpeg and ffprobe: nothing to install. Whisper models download from the
+  app's own settings. Version stamp: `1.0.0-beta.<commit id>`.
+- **Your settings, your agents** — stage zero picks who edits: opencode /
+  zcode / claude code / codex (spawned headless) or an API brain (openrouter /
+  z.ai / paasta.cloud) with your own keys.
+- **The pipeline** — `prepare → transcribe → review → understand → reference →
+  assets → strategy → scaffold → preview → (chat edits) → final → verify`, with
+  two human review gates (the transcript table and the 640 px demo + Persian
+  chat box).
+- **Hard rules** — renders capped at the configured CPU share (default 50 %)
+  through the cool-render wrapper; on-screen copy only from the transcript;
+  one brand token set; Vazirmatn for every Persian word; WebM alpha and
+  platform safe-rect invariants enforced.
+- **Landing page** — [pedramgholizadeh.github.io/ai-agentic-video-studio/download.html](https://pedramgholizadeh.github.io/ai-agentic-video-studio/download.html)
+  with live download links from the latest release.
 
-## Licence / policy
-
-همان ریپوی قبلی: موتور رندر HyperFrames (Apache-2.0) از راه npx، GSAP فقط
-vendored، متنِ روی تصویر فقط از ترنسکریپت یا جهت‌دهی خودت — هیچ عدد یا ادعایی
-اختراع نمی‌شود. جزئیات: [NOTICE.md](NOTICE.md) · [SECURITY.md](SECURITY.md).
+**Built by Pedram Gholizadeh (پدرام قلی‌زاده) — design & development.**
+Engine: HyperFrames · Panel: vanilla JS, RTL, fa-default · Licence: MIT
+(see [NOTICE.md](NOTICE.md)).

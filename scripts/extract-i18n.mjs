@@ -21,7 +21,10 @@ const HAS_FA = /[؀-ۿ]/;
  * which is exactly the granularity the runtime translator has to match. */
 const TEXT_RUN = /[^"'`;{}()<>|$\\&=+*/\n\r]+/g;
 
-const UI_FILES = ['ui/index.html', 'ui/app.js', 'ui/engine.js'];
+const UI_FILES = ['ui/index.html', 'ui/download.html', 'ui/app.js', 'ui/engine.js'];
+/* SEO meta descriptions are for crawlers, not for the interface — they carry
+ * mixed-script sentences the panel never renders as chrome. */
+const STRIP_META = /<meta\s+name="description"[^>]*>/gi;
 const ENGINE_FILES = ['server.mjs', 'cli.mjs'];
 /* These files speak Persian *about data*, not about the interface: the filler
  * word list that keeps a card from reading like a slogan, the Persian→icon
@@ -125,7 +128,8 @@ const files = [
 
 const phrases = new Map();
 for (const rel of files) {
-  const src = fs.readFileSync(path.join(STUDIO_ROOT, rel), 'utf8');
+  let src = fs.readFileSync(path.join(STUDIO_ROOT, rel), 'utf8');
+  if (rel.endsWith('.html')) src = src.replace(STRIP_META, '<meta>');
   for (const p of phrasesFromSource(src)) {
     if (!phrases.has(p)) phrases.set(p, []);
     if (!phrases.get(p).includes(rel)) phrases.get(p).push(rel);

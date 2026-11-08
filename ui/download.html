@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#101111">
+<title>استودیو ویدیو — دانلود اپلیکیشن | Video Studio — Download</title>
+<meta name="description" content="دو فایل بده — ویدیوی خودت و یک رفرنس — یک تدوین بگیر. اپلیکیشن دسکتاپ استودیو ویدیو برای macOS و Windows. Two files in, one edit out — the Video Studio desktop app.">
+<link rel="stylesheet" href="/assets/fonts/vazirmatn.css">
+<link rel="stylesheet" href="/app.css">
+<style>
+  /* landing-only chrome: centered hero, no panel chrome */
+  .land { max-width: 1020px; margin: 0 auto; padding: clamp(48px, 9vw, 110px) clamp(20px, 4vw, 40px) 80px; }
+  .land-hero { text-align: center; }
+  .land-hero .mark { width: 84px; height: 84px; border-radius: 22px; display: inline-grid; place-items: center;
+    font-size: 38px; color: var(--accent-ink); background: linear-gradient(150deg, var(--accent), var(--accent-2));
+    box-shadow: 0 24px 60px -20px rgba(85,230,165,.7); margin-bottom: var(--s5); }
+  .land-hero h1 { font-size: clamp(34px, 5.4vw, 54px); font-weight: 800; letter-spacing: -0.02em; margin: 0 0 var(--s3); }
+  .land-hero h1 em { font-style: normal; color: var(--accent); }
+  .land-hero .sub { color: var(--muted); font-size: clamp(15px, 2vw, 18px); line-height: 2; max-width: 62ch; margin: 0 auto var(--s6); }
+  .land-badge { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--warn);
+    border: 1px solid rgba(240,191,116,.4); background: var(--warn-dim); border-radius: var(--r-pill); padding: 6px 16px; margin-bottom: var(--s5); }
+
+  .dl-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--s4); margin: var(--s6) 0 var(--s4); }
+  .dl-card { background: linear-gradient(150deg, rgba(85,230,165,.05), rgba(255,255,255,.01)), var(--panel);
+    border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--s5); display: grid; gap: var(--s2); justify-items: start;
+    transition: border-color var(--dur), transform var(--dur); }
+  .dl-card:hover { border-color: var(--accent-line); transform: translateY(-2px); }
+  .dl-card .os { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 16px; }
+  .dl-card .os svg { width: 26px; height: 26px; fill: var(--ink); }
+  .dl-card .ver { color: var(--faint); font-size: 12.5px; font-variant-numeric: tabular-nums; }
+  .dl-card .primary { width: 100%; justify-content: center; }
+  .dl-card .alt { color: var(--faint); font-size: 12px; }
+  .dl-card a { text-decoration: none; }
+  .dl-empty { grid-column: 1/-1; text-align: center; color: var(--muted); padding: var(--s5); border: 1.5px dashed var(--hairline-2); border-radius: var(--r-lg); }
+  .land-links { display: flex; gap: var(--s3); justify-content: center; flex-wrap: wrap; margin-bottom: var(--s8); }
+
+  .land h2 { font-size: clamp(24px, 3.2vw, 31px); font-weight: 800; letter-spacing: -0.015em; margin: var(--s8) 0 var(--s4); }
+  .feat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--s3); }
+  .feat { background: var(--panel); border: 1px solid var(--hairline); border-radius: var(--r-lg); padding: var(--s4); }
+  .feat b { display: block; margin-bottom: 6px; }
+  .feat p { margin: 0; color: var(--muted); font-size: 13.5px; line-height: 1.9; }
+  .pipe { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; }
+  .pipe span { background: var(--surface); border: 1px solid var(--hairline); border-radius: var(--r-pill); padding: 8px 16px; font-size: 13px; color: var(--muted); }
+  .pipe i { color: var(--accent); font-style: normal; }
+  .land-note { color: var(--faint); font-size: 13px; line-height: 2; max-width: 78ch; }
+  .land-footer { border-top: 1px solid var(--hairline); margin-top: var(--s8); padding-top: var(--s5); display: flex; justify-content: space-between; gap: var(--s4); flex-wrap: wrap; color: var(--faint); font-size: 13px; }
+  .land-footer b { color: var(--ink); }
+  .lang-btn { position: fixed; top: 16px; inset-inline-end: 16px; z-index: 50; }
+  @media (max-width: 720px) { .about-mark-size { width: 64px; height: 64px; } }
+</style>
+</head>
+<body>
+<button class="ghost tiny lang-btn" id="langBtn">EN</button>
+
+<main class="land">
+  <section class="land-hero">
+    <div class="mark" aria-hidden="true">▶</div>
+    <h1>استودیو <em>ویدیو</em></h1>
+    <p class="sub">دو فایل بده — ویدیوی خودت و یک ویدیوی رفرنس — بقیه‌اش با ایجنتِ انتخابی خودت: ترنسکریپت دقیق، درک محتوا، سناریو، دمو و ادیتِ چت‌طور، تا خروجی نهایی ۳۰ فریم.<br><span style="color:var(--faint)">Two files in — your video and a reference — one finished edit out, at 30 fps.</span></p>
+    <div class="land-badge">β نسخهٔ بتا — بازخوردتان زندگی‌مان است</div>
+
+    <div class="dl-grid" id="dlGrid">
+      <div class="dl-card">
+        <div class="os"><svg viewBox="0 0 384 512" aria-hidden="true"><path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z"/></svg>macOS</div>
+        <div class="ver" data-slot="mac-ver">—</div>
+        <a class="primary" data-slot="mac-dl" href="https://github.com/pedramgholizadeh/ai-agentic-video-studio/releases/latest">دانلود برای مک (Apple Silicon)</a>
+        <span class="alt">dmg · arm64 · macOS 14+</span>
+      </div>
+      <div class="dl-card">
+        <div class="os"><svg viewBox="0 0 448 512" aria-hidden="true"><path d="M0 93.7l183.6-25.3v177.4H0V93.7zm0 324.6l183.6 25.3V268.4H0v149.9zm203.8 28L448 480V268.4H203.8v177.9zm0-380.6v180.1H448V32L203.8 65.7z"/></svg>Windows</div>
+        <div class="ver" data-slot="win-ver">—</div>
+        <a class="primary" data-slot="win-dl" href="https://github.com/pedramgholizadeh/ai-agentic-video-studio/releases/latest">دانلود برای ویندوز (x64)</a>
+        <span class="alt">NSIS installer · Windows 10/11</span>
+      </div>
+    </div>
+    <div class="land-links">
+      <a class="ghost" href="https://github.com/pedramgholizadeh/ai-agentic-video-studio/releases" target="_blank" rel="noreferrer">همهٔ نسخه‌ها و تغییرات</a>
+      <a class="ghost" href="https://github.com/pedramgholizadeh/ai-agentic-video-studio" target="_blank" rel="noreferrer">کد و مستندات</a>
+      <a class="ghost" href="/">پنل وب (همین ماشین)</a>
+    </div>
+  </section>
+
+  <h2>چه می‌کند؟</h2>
+  <div class="feat-grid">
+    <div class="feat"><b>دو فایل، نه ده دکمه</b><p>ویدیوی خودت + ویدیوی رفرنس. سبک رفرنس پیکسل‌پرفکت تحلیل می‌شود — ریتم، ترنزیشن، پالت — و روی فیلم تو پیاده می‌شود.</p></div>
+    <div class="feat"><b>ترنسکریپتی که می‌توانی اعتماد کنی</b><p>whisper آفلاین با مدل بزرگ، سپس دروازهٔ بازبینی: هر خط قابل ویرایش، کلیک روی زمان = پرش ویدیو.</p></div>
+    <div class="feat"><b>ادیت با چت فارسی</b><p>«تراکم بیشتر»، «زیرنویس بالاتر»، «خط ۳: …» — بگو، اعمال می‌شود، دموی تازه می‌آید. تا تایید تو هیچ خروجی نهایی‌ای ساخته نمی‌شود.</p></div>
+    <div class="feat"><b>خروجی تمیز ۳۰ فریم</b><p>۱۰۸۰×۱۹۲۰ یا ۱۹۲۰×۱۰۸۰، زیرنویس کلمه‌به‌کلمهٔ Vazirmatn داخل حاشیهٔ امن پلتفرم، صداگذاری اندازه‌گیری‌شده.</p></div>
+    <div class="feat"><b>حافظهٔ رفرنس</b><p>هر رفرنس یک بار تحلیل می‌شود و برای همیشه می‌ماند — جاب بعدی با همان سبک بی‌درنگ شروع می‌شود.</p></div>
+    <div class="feat"><b>ایجنت خودت، مغز API خودت</b><p>ادیت را opencode / zcode / claude code / codex انجام می‌دهد یا مغز API خودت (openrouter / z.ai / paasta.cloud) — کلیدها در تنظیمات خودت.</p></div>
+  </div>
+
+  <h2>چطور کار می‌کند؟</h2>
+  <div class="pipe">
+    <span>transcribe</span><i>→</i><span>بازبینی متن</span><i>→</i><span>درک محتوا</span><i>→</i><span>تحلیل رفرنس</span><i>→</i><span>اسِت‌ها</span><i>→</i><span>سناریو</span><i>→</i><span>دمو + چت</span><i>→</i><span>خروجی نهایی</span>
+  </div>
+
+  <h2>پیش‌نیازها و نکات بتا</h2>
+  <p class="land-note">
+    داخل اپ همه‌چیز هست: Node، npm/npx، ffmpeg و ffprobe — چیزی نصب نمی‌کنی. فقط اولین رندر به اینترنت نیاز دارد
+    (Chrome headless و رانتایم whisper یک‌بار دانلود می‌شوند) و مدل‌های whisper را از تنظیماتِ خود اپ می‌گیری.<br>
+    نسخهٔ بتا امضای دیجیتال ندارد: در macOS اولین اجرا با راست‌کلیک → Open؛ در ویندوز SmartScreen را با
+    More info → Run anyway رد کن. رندرها با قانون خانه روی ۵۰٪ توان CPU قفل‌اند — از تنظیمات عوضش کن.
+  </p>
+
+  <footer class="land-footer">
+    <div><b>استودیو ویدیو — Video Studio</b> · نسخهٔ <span data-slot="app-ver">بتا ۱.۰</span></div>
+    <div><b>ساختهٔ پدرام قلی‌زاده</b> · Built by Pedram Gholizadeh · <a href="https://github.com/pedramgholizadeh" target="_blank" rel="noreferrer">github.com/pedramgholizadeh</a></div>
+  </footer>
+</main>
+
+<script>
+  // real download targets straight from the latest GitHub release
+  (async () => {
+    try {
+      const res = await fetch('https://api.github.com/repos/pedramgholizadeh/ai-agentic-video-studio/releases/latest');
+      if (!res.ok) throw new Error(res.status);
+      const rel = await res.json();
+      const fmt = (b) => b > 1e9 ? (b / 1e9).toFixed(2) + ' GB' : Math.round(b / 1e6) + ' MB';
+      document.querySelector('[data-slot="app-ver"]').textContent = rel.tag_name || rel.name || 'بتا ۱.۰';
+      for (const a of rel.assets || []) {
+        if (a.name.endsWith('.dmg')) {
+          const el = document.querySelector('[data-slot="mac-dl"]');
+          el.href = a.browser_download_url;
+          el.textContent = `دانلود ${fmt(a.size)}`;
+          document.querySelector('[data-slot="mac-ver"]').textContent = `${rel.tag_name} · ${a.name}`;
+        }
+        if (a.name.endsWith('.exe')) {
+          const el = document.querySelector('[data-slot="win-dl"]');
+          el.href = a.browser_download_url;
+          el.textContent = `دانلود ${fmt(a.size)}`;
+          document.querySelector('[data-slot="win-ver"]').textContent = `${rel.tag_name} · ${a.name}`;
+        }
+      }
+    } catch { /* the fallback links already point at releases/latest */ }
+  })();
+  document.getElementById('langBtn').onclick = () => {
+    const cur = localStorage['studio.lang'] || 'fa';
+    localStorage['studio.lang'] = cur === 'fa' ? 'en' : 'fa';
+    location.reload();
+  };
+</script>
+<script src="/i18n.js"></script>
+</body>
+</html>
