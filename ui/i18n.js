@@ -338,7 +338,31 @@
   "شروع شد — تا تمام شدن همین‌جا می‌ماند": "started — stay here until it lands",
   "این دستور را در ترمینال": "Run this in your terminal",
   "از ریشهٔ ریپو": "from the repo root",
-  "اجرا کن تا ایجنت جاب را بردارد:": "so the agent picks the job up:"
+  "اجرا کن تا ایجنت جاب را بردارد:": "so the agent picks the job up:",
+  "نسخهٔ اپ": "App version",
+  "نسخهٔ وب — از ترمینال اجرا شده": "web panel — run from the terminal",
+  "موتور": "Engine",
+  "سازنده": "Builder",
+  "بررسی به‌روزرسانی": "Check for updates",
+  "گیت‌هاب": "GitHub",
+  "ساختهٔ پدرام قلی‌زاده": "Built by Pedram Gholizadeh",
+  "— طراح و توسعه‌دهنده؛ دو فایل می‌گیری، یک تدوین می‌گیری.": "— design & development; two files in, one edit out.",
+  "Built by": "Built by",
+  "— design & development. Two files in, one edit out.": "— design & development. Two files in, one edit out.",
+  "به‌روزرسانی": "Update",
+  "از GitHub Releases — خودکار چک می‌شود": "from GitHub Releases — checked automatically",
+  "در حال بررسی…": "checking…",
+  "بررسی نشد": "check failed",
+  "نسخهٔ پیدا شد — در حال دانلود…": "version found — downloading…",
+  "آخرین نسخه را داری ✓": "you are on the latest version ✓",
+  "دانلود شد": "downloaded",
+  "نصب و راه‌اندازی دوباره": "Install & relaunch",
+  "آمادهٔ نصب است ✓": "ready to install ✓",
+  "خطای به‌روزرسانی": "update error",
+  "دربارهٔ استودیو ویدیو": "About Video Studio",
+  "نسخهٔ": "version",
+  "دانلود مدل شروع شد — تا تمام شدن همین‌جا می‌ماند": "model download started — stay here until it lands",
+  "پیدا شد — در حال دانلود…": "found — downloading…"
 };
 
   /* Word-level table for interpolated text. Deliberately small and specific:
@@ -534,7 +558,9 @@
   "تمام": "finished",
   "تمیز": "clean",
   "سالم": "healthy",
-  "امن": "safe"
+  "امن": "safe",
+  "پدرام": "Pedram",
+  "قلی‌زاده": "Gholizadeh"
 };
 
   /* Function words and verbs. Applied only when a strong term already matched

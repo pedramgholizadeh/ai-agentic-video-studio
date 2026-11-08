@@ -97,7 +97,10 @@
     $$('.nav-link').forEach((b) => b.classList.toggle('on', b.dataset.view === view));
     if (view === 'jobs') loadJobs();
     if (view === 'references') loadReferences();
-    if (view === 'settings') loadSettings();
+    if (view === 'settings') {
+      loadSettings();
+      paintAbout();
+    }
     if (view === 'new-job') paintStartSummary();
   }
 
@@ -903,6 +906,52 @@
       row.querySelector('.pk-model').addEventListener('change', async (e) => {
         S.cfg = await api('/api/config', { method: 'POST', body: { providers: { [row.dataset.p]: { model: e.target.value.trim() } } } });
       });
+    });
+  }
+
+  /** The About card: who built it, which version, and the in-app updater. */
+  function paintAbout() {
+    const m = S.manifest || {};
+    $('#aboutRows').innerHTML = `
+      <div class="row"><b>نسخهٔ اپ</b><span>${esc(m.appVersion || 'نسخهٔ وب — از ترمینال اجرا شده')}</span></div>
+      <div class="row"><b>موتور</b><span>${esc(m.studio)} ${esc(m.version)} · HyperFrames</span></div>
+      <div class="row"><b>سازنده</b><span>Pedram Gholizadeh · پدرام قلی‌زاده</span></div>`;
+    const api = window.electronAPI;
+    const btn = $('#updateCheck');
+    if (!api) {
+      btn.hidden = true;
+      $('#updateState').innerHTML = '';
+      return;
+    }
+    btn.hidden = false;
+    $('#updateState').innerHTML = `<div class="row"><b>به‌روزرسانی</b><span>از GitHub Releases — خودکار چک می‌شود</span></div>`;
+    btn.onclick = async () => {
+      btn.disabled = true;
+      btn.textContent = 'در حال بررسی…';
+      try {
+        await api.checkForUpdates();
+      } catch (err) {
+        toast(err.message || 'بررسی نشد', 'bad');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'بررسی به‌روزرسانی';
+      }
+    };
+    api.onUpdateStatus((s) => {
+      const box = $('#updateState');
+      if (s.status === 'checking') box.innerHTML = `<div class="row"><b>به‌روزرسانی</b><span>در حال بررسی…</span></div>`;
+      if (s.status === 'available') box.innerHTML = `<div class="row"><b>به‌روزرسانی</b><span>نسخهٔ ${esc(s.version)} پیدا شد — در حال دانلود…</span></div>`;
+      if (s.status === 'not-available') box.innerHTML = `<div class="row"><b>به‌روزرسانی</b><span>آخرین نسخه را داری ✓</span></div>`;
+      if (s.status === 'downloaded') {
+        box.innerHTML = `<div class="row"><b>به‌روزرسانی</b><span>نسخهٔ ${esc(s.version)} دانلود شد</span></div>
+          <div class="actions"><button class="primary" id="updateInstall">نصب و راه‌اندازی دوباره</button></div>`;
+        $('#updateInstall').onclick = () => api.installUpdate();
+        toast(`نسخهٔ ${s.version} آمادهٔ نصب است ✓`);
+      }
+      if (s.status === 'error') {
+        box.innerHTML = `<div class="row"><b>به‌روزرسانی</b><span>خطا: ${esc(s.message || '')}</span></div>`;
+        toast(s.message || 'خطای به‌روزرسانی', 'bad');
+      }
     });
   }
 

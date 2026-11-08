@@ -77,6 +77,36 @@ node scripts/motion.mjs refprofile|brief|brand|beats|write|sfx|final|collage|ins
 
 قرارداد کامل برای ایجنت‌ها: [AGENTS.md](AGENTS.md).
 
+## اپلیکیشن دسکتاپ — The desktop app (beta)
+
+استودیو به‌صورت اپلیکیشن بومی هم عرضه می‌شود — **macOS (dmg)** و **Windows
+(NSIS installer)** — ساخته‌شده با GitHub Actions. داخل بسته همه‌چیز هست:
+**node و npm و npx**، **ffmpeg و ffprobe**، موتور استودیو و پنل. پیش‌نیاز
+بیرونی فقط اینترنت است (اولین رندر، Chrome headless و رانتایم whisper را
+یک‌بار دانلود می‌کند) و مدل‌های whisper از خود تنظیماتِ اپ دانلود می‌شوند.
+
+- **نسخه‌گذاری بتا**: `1.0.0-beta.<شناسهٔ کامیت>` — هر بیلد به کامیت خودش
+  بنشیند.
+- **آپدیت درون‌برنامه‌ای**: اپ از **GitHub Releases** چک می‌کند (خودکار در
+  شروع و هر ۶ ساعت، و با دکمهٔ «بررسی به‌روزرسانی» در تنظیمات)؛ دانلود
+  خودکار و نصب با یک کلیک.
+- **بخش درباره**: فارسی و انگلیسی — سازنده، نسخه و لینک ریپو.
+
+ساختن و نصب:
+
+1. از تب **Actions** ریپو، workflow «Desktop app (macOS + Windows)» را با
+   پوشِ تگ اجرا کن (`git tag v1.0.0-beta.<sha> && git push origin <tag>`) —
+   یا دستی (workflow_dispatch) و فایل‌ها را از artifacts بردار.
+2. تگ‌ها یک **Release** با نصب‌کننده‌ها و چک‌سام می‌سازند؛ همان Release منبع
+   آپدیتر درون‌برنامه‌ای است.
+3. نصب: mac — dmg را باز و اپ را در Applications بگذار (اولین اجرا: راست‌کلیک
+   → Open، چون بتا امضاشده نیست). Windows — Setup.exe را اجرا کن
+   (SmartScreen: More info → Run anyway).
+
+نکتهٔ فنی: شل دسکتاپ (`desktop/`) سرورِ همان استودیو را با باینری Electron در
+حالت `ELECTRON_RUN_AS_NODE` اجرا می‌کند و پنل را داخل پنجرهٔ خودش نشان می‌دهد —
+همان پنل، همان موتور، همان قوانین توان.
+
 ## پنل منتشرشده — The hosted panel
 
 `ui/` روی GitHub Pages هم منتشر می‌شود (workflow ریپو). نسخهٔ میزبان بدون موتور

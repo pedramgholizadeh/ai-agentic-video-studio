@@ -29,3 +29,10 @@ Thumbs.db
 # lib/assets.mjs (the registry) is committed.
 assets/store/
 old/assets/store/
+
+# The desktop shell: dependencies, build output and the CI-provisioned
+# runtimes are all produced either locally or inside the Actions build.
+desktop/node_modules/
+desktop/release/
+desktop/bin/
+desktop/node-runtime/

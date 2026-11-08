@@ -1,0 +1,93 @@
+{
+  "name": "video-studio-desktop",
+  "productName": "Video Studio",
+  "version": "1.0.0-beta.0",
+  "description": "استودیو ویدیو — desktop shell for the local re-edit studio",
+  "private": true,
+  "main": "main.cjs",
+  "author": "Pedram Gholizadeh <https://github.com/pedramgholizadeh>",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:mac": "electron-builder --mac",
+    "dist:win": "electron-builder --win"
+  },
+  "dependencies": {
+    "electron-updater": "6.3.9"
+  },
+  "devDependencies": {
+    "electron": "33.2.0",
+    "electron-builder": "25.1.8",
+    "ffmpeg-static": "5.2.0",
+    "ffprobe-static": "3.1.0"
+  },
+  "build": {
+    "appId": "com.pedramgholizadeh.videostudio",
+    "productName": "Video Studio",
+    "asar": true,
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "main.cjs",
+      "preload.cjs",
+      "package.json"
+    ],
+    "extraResources": [
+      {
+        "from": "../",
+        "to": "studio",
+        "filter": [
+          "server.mjs",
+          "cli.mjs",
+          "package.json",
+          "lib/**",
+          "engine/**",
+          "scripts/**",
+          "templates/**",
+          "tools/**",
+          "ui/**",
+          "assets/overlay-template/**",
+          "assets/templates/**"
+        ]
+      },
+      {
+        "from": "bin",
+        "to": "bin"
+      },
+      {
+        "from": "node-runtime",
+        "to": "node"
+      }
+    ],
+    "mac": {
+      "target": [
+        "dmg",
+        "zip"
+      ],
+      "icon": "build/icon.png",
+      "category": "public.app-category.video",
+      "identity": null,
+      "artifactName": "${productName}-${version}-${os}-${arch}.${ext}"
+    },
+    "win": {
+      "target": [
+        "nsis"
+      ],
+      "icon": "build/icon.png",
+      "artifactName": "${productName}-Setup-${version}-${os}-${arch}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "${productName}-Setup-${version}-${os}-${arch}.${ext}"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "pedramgholizadeh",
+      "repo": "ai-agentic-video-studio",
+      "releaseType": "release"
+    }
+  }
+}

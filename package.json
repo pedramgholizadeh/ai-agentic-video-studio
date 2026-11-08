@@ -18,6 +18,7 @@
     "i18n:extract": "node scripts/extract-i18n.mjs",
     "i18n:check": "node scripts/extract-i18n.mjs --coverage",
     "models": "node scripts/fetch-models.mjs",
+    "icon": "node scripts/make-icon.mjs | ffmpeg -y -v error -f rawvideo -pix_fmt rgba -s 1024x1024 -r 1 -i - -frames:v 1 desktop/build/icon.png",
     "textures": "node scripts/build-textures.mjs",
     "assets": "node scripts/fetch-assets.mjs"
   }

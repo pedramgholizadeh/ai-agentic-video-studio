@@ -1,0 +1,103 @@
+name: Desktop app (macOS + Windows)
+
+# beta installers built from this very commit — the version number is
+# 1.0.0-beta.<short-sha>, and a tagged push (v1.0.0-beta.*) publishes a
+# GitHub Release that the app's in-app updater feeds from.
+
+on:
+  workflow_dispatch:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: macos-14
+            platform: darwin
+            arch: arm64
+            node-artifact: node-v22.12.0-darwin-arm64.tar.gz
+            node-dir: node-v22.12.0-darwin-arm64
+            targets: --mac
+          - os: windows-latest
+            platform: win32
+            arch: x64
+            node-artifact: node-v22.12.0-win-x64.zip
+            node-dir: node-v22.12.0-win-x64
+            targets: --win
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 45
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Short SHA
+        id: sha
+        run: echo "short=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Install desktop dependencies
+        working-directory: desktop
+        run: npm install
+
+      - name: Bundle the Node runtime (node + npm + npx)
+        working-directory: desktop
+        shell: bash
+        run: |
+          curl -fSL --retry 3 -o runtime "${{ format('https://nodejs.org/dist/v22.12.0/{0}', matrix.node-artifact) }}"
+          mkdir -p node-runtime
+          case "${{ matrix.platform }}" in
+            darwin) tar -xzf runtime && mv "${{ matrix.node-dir }}"/* node-runtime/ && rm -rf "${{ matrix.node-dir }}" runtime ;;
+            win32)  unzip -q runtime && mv "${{ matrix.node-dir }}"/* node-runtime/ && rm -rf "${{ matrix.node-dir }}" runtime ;;
+          esac
+
+      - name: Bundle ffmpeg + ffprobe
+        working-directory: desktop
+        shell: bash
+        run: |
+          mkdir -p bin
+          case "${{ matrix.platform }}" in
+            darwin)
+              cp node_modules/ffmpeg-static/ffmpeg bin/ffmpeg
+              cp node_modules/ffprobe-static/bin/darwin/arm64/ffprobe bin/ffprobe
+              chmod +x bin/ffmpeg bin/ffprobe
+              ;;
+            win32)
+              cp node_modules/ffmpeg-static/ffmpeg.exe bin/ffmpeg.exe
+              cp node_modules/ffprobe-static/bin/win32/x64/ffprobe.exe bin/ffprobe.exe
+              ;;
+          esac
+
+      - name: Stamp the beta version (1.0.0-beta.<commit id>)
+        working-directory: desktop
+        shell: bash
+        run: npm version "1.0.0-beta.${{ steps.sha.outputs.short }}" --no-git-tag-version --allow-same-version
+
+      - name: Build installers
+        working-directory: desktop
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
+            npx electron-builder ${{ matrix.targets }} --publish always
+          else
+            npx electron-builder ${{ matrix.targets }} --publish never
+          fi
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: video-studio-${{ matrix.platform }}-${{ matrix.arch }}
+          path: |
+            desktop/release/*.dmg
+            desktop/release/*.zip
+            desktop/release/*.exe
+          if-no-files-found: error

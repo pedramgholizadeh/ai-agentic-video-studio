@@ -182,6 +182,9 @@ async function api(req, res, url) {
     return json(res, 200, {
       studio: 'video-studio',
       version: '2.0.0',
+      // set by the desktop shell; null when the panel runs from the terminal
+      appVersion: process.env.VIDEO_STUDIO_APP_VERSION || null,
+      updateFeed: process.env.VIDEO_STUDIO_UPDATE_FEED || null,
       ratios: RATIOS.filter((r) => r.id === '16:9' || r.id === '9:16').map((r) => ({ id: r.id, w: r.w, h: r.h })),
       qualities: ['draft', 'looks', 'delivery'],
       densities: ['auto', 'sparse', 'balanced', 'rich'],
@@ -449,7 +452,10 @@ async function api(req, res, url) {
         subtitles.writeSrt(jobs.paths(id).transcript, cues);
         chat.invalidateArtifacts(id, intent.invalidate);
         chat.appendMessage(id, { role: 'studio', text: intent.fa, meta: { intent: intent.kind, line: i + 1 } });
-        if (jobs.get(id).status === 'review' && jobs.get(id).gate?.kind === 'preview') runner.runJob(id).catch(() => {});
+        const cur = jobs.get(id);
+        // agent-mode jobs belong to the claiming agent — the panel never
+        // starts the built-in runner behind its back; it reads chat.jsonl
+        if (cur.status === 'review' && cur.config.engine.mode !== 'agent') runner.runJob(id).catch(() => {});
         return json(res, 200, { ok: true, intent: intent });
       }
       // a config patch — applied at once; artifacts downstream are invalidated
@@ -458,7 +464,7 @@ async function api(req, res, url) {
       chat.appendMessage(id, { role: 'studio', text: intent.fa, meta: { intent: intent.kind, applied: true } });
       jobs.appendLog(id, 'info', `ادیت چت اعمال شد: ${intent.fa}`);
       const current = jobs.get(id);
-      if (current.status === 'review') runner.runJob(id).catch(() => {});
+      if (current.status === 'review' && current.config.engine.mode !== 'agent') runner.runJob(id).catch(() => {});
       return json(res, 200, { ok: true, intent: intent });
     }
 

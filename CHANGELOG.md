@@ -5,6 +5,40 @@ The format follows [keep-a-changelog](https://keepachangelog.com/en/1.1.0/);
 the project does not track dates before 1.0.0 — it grew inside a private
 working repository and this is its first public form.
 
+## [1.0.0-beta] — 2026-11-08
+
+### The studio becomes a desktop app (macOS + Windows)
+
+- **Native installers from GitHub Actions**: a matrix workflow builds a macOS
+  dmg (+ zip for the updater) and a Windows NSIS setup from every
+  `v1.0.0-beta.*` tag; dispatch builds land as artifacts. The version stamp is
+  `1.0.0-beta.<commit id>`.
+- **Fully self-contained shell** (`desktop/main.cjs`): the bundled Node
+  runtime (npm/npx included) and ffmpeg + ffprobe ship inside the app; the
+  Electron binary itself runs the studio server in `ELECTRON_RUN_AS_NODE`
+  mode, so a fresh machine installs nothing. HyperFrames' Chrome and the
+  whisper runtime download on first use; whisper models download from the
+  app's own settings.
+- **In-app updates**: electron-updater against GitHub Releases — automatic
+  check at boot and every six hours, auto-download, one-click install, plus a
+  manual «بررسی به‌روزرسانی» in settings and a status row in the About card.
+- **Bilingual About** (فارسی/English): builder credits (Pedram Gholizadeh —
+  پدرام قلی‌زاده), engine version, app version from the release, repo link;
+  mirrored in the native About panel and the menu.
+- **Engine portability for Windows**: the power wrapper falls back to the
+  worker/thread caps when `taskpolicy` is absent, disk checks use portable
+  `fs.statfs`, and `npx` resolves as `npx.cmd`.
+- Panel fixes carried in the same train: the live players no longer reload on
+  every SSE tick, the transcript gate fails loud-but-kindly with a retry
+  instead of «خط‌ها نامعتبرند», the wake command is copyable, agent-mode jobs
+  never start the built-in runner behind the claiming agent's back.
+
+
+All notable changes to this project are documented here.
+The format follows [keep-a-changelog](https://keepachangelog.com/en/1.1.0/);
+the project does not track dates before 1.0.0 — it grew inside a private
+working repository and this is its first public form.
+
 ## [2.0.0] — 2026-11-07
 
 ### The studio becomes a re-edit studio
