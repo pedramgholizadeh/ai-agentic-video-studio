@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://pedramgholizadeh.github.io/ai-agentic-video-studio/sitemap.xml

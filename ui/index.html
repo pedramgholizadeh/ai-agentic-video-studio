@@ -20,7 +20,7 @@
 <header class="top">
   <a class="brand" href="#" data-view="new-job">
     <span class="brand-mark" aria-hidden="true">▶</span>
-    <span class="brand-name">استودیو ویدیو</span>
+    <span class="brand-name">استودیوی ادیت ویدیو با هوش مصنوعی</span>
   </a>
   <nav class="nav">
     <button class="nav-link on" data-view="new-job">جاب جدید</button>
@@ -40,20 +40,22 @@
 <!-- ═══════════════ ۱. جاب جدید (مرحلهٔ صفر) ═══════════════ -->
 <section id="new-job-view" class="view on">
   <h2>جاب جدید</h2>
-  <p class="lead">دو فایل بده — ویدیوی خودت و یک ویدیوی رفرنس — بقیه‌اش با ایجنتِ انتخابی خودت.</p>
+  <p class="lead">دو تا فایل بده — ویدیوی خودت و یه ویدیوی رفرنس — بقیه‌ش با ایجنتی که خودت انتخاب می‌کنی.</p>
 
   <div class="new-grid">
     <ol class="steps" id="wizardSteps">
-      <li class="active" data-step="1"><span>۱</span><div><b>ایجنت</b><small>کی ادیت را انجام می‌دهد</small></div></li>
-      <li data-step="2"><span>۲</span><div><b>ورودی‌ها</b><small>ویدیوی من + رفرنس</small></div></li>
-      <li data-step="3"><span>۳</span><div><b>خروجی</b><small>نسبت، کیفیت، صدا</small></div></li>
-      <li data-step="4"><span>۴</span><div><b>شروع</b><small>مرور و اجرا</small></div></li>
+      <li class="active" data-step="1"><span>۱</span><div><b>ایجنت</b><small>کی ادیت کنه؟</small></div></li>
+      <li data-step="2"><span>۲</span><div><b>ورودی‌ها</b><small>فیلمت + رفرنس</small></div></li>
+      <li data-step="3"><span>۳</span><div><b>خروجی</b><small>فرمت و صدا</small></div></li>
+      <li data-step="4"><span>۴</span><div><b>شروع</b><small>یه نگاه، بزن بریم</small></div></li>
     </ol>
 
     <div class="wizard-body">
       <!-- گام ۱: ایجنت -->
       <div class="wstep on" data-wstep="1">
-        <h3>مرحلهٔ صفر — چه کسی ادیت کند؟</h3>
+        <h3>اول بگو کی ادیت رو انجام بده؟
+      <span class="tip" tabindex="0" role="button" aria-label="راهنمای انتخاب ایجنت">؟<span class="tip-body"><b>ایجنت</b> یعنی یه دستیار کدنویس (مثل opencode یا claude code) که جاب رو خودش تا خروجی جلو می‌بره. اگه نصب نبود، دستورش رو کپی کن تو ترمینال.<br><b>مغز API</b> یعنی یه مدل زبانی (مثل GLM) که فقط مرحله‌های فکری رو جواب می‌ده؛ رندر همیشه روی همین سیستمه و با توان محدود.</span></span>
+    </h3>
         <div class="cards two" id="agentCards"></div>
         <div class="provider-block" id="providerBlock" hidden>
           <h4>مغز API</h4>
@@ -69,17 +71,19 @@
 
       <!-- گام ۲: ورودی‌ها -->
       <div class="wstep" data-wstep="2">
-        <h3>دو فایل ورودی</h3>
+        <h3>حالا دو تا فایل ورودی
+      <span class="tip" tabindex="0" role="button" aria-label="راهنمای فایل‌ها">؟<span class="tip-body">هر دو تا رو می‌تونی <b>بکشی و بندازی</b> یا از دیسک انتخاب کنی. رفرنس یه بار تحلیل می‌شه و برای همیشه توی حافظه می‌مونه — دفعه‌ی بعد خودش پیشنهادش رو می‌ده.</span></span>
+    </h3>
         <div class="cards two">
           <div class="card source" id="srcVideo">
             <h4>ویدیوی من</h4>
-            <p class="hint">همان فیلمی که باید ادیت شود.</p>
+            <p class="hint">همون فیلمی که می‌خوای ادیت بشه.</p>
             <div class="slot" data-slot="video"><span>فایل را بکِش و رها کن، یا</span><button class="ghost tiny pick">از دیسک انتخاب کن</button><em id="srcVideoName">هیچ</em></div>
             <p class="probe" id="srcVideoProbe"></p>
           </div>
           <div class="card source" id="srcRef">
             <h4>ویدیوی رفرنس</h4>
-            <p class="hint">سبک هدف — ریتم، ترنزیشن، پالت. یک بار تحلیل می‌شود و برای همیشه یاد می‌ماند.</p>
+            <p class="hint">فیلمی که سلیقه‌شو دوست داری — ریتم و ترنزیشن و رنگش یاد گرفته می‌شه.</p>
             <div class="slot" data-slot="reference"><span>فایل را بکِش و رها کن، یا</span><button class="ghost tiny pick">از دیسک انتخاب کن</button><em id="srcRefName">هیچ</em></div>
             <p class="probe" id="srcRefProbe"></p>
             <div id="refSuggest"></div>
@@ -92,7 +96,9 @@
 
       <!-- گام ۳: خروجی -->
       <div class="wstep" data-wstep="3">
-        <h3>خروجی نهایی</h3>
+        <h3>خروجی چطوری باشه؟
+      <span class="tip" tabindex="0" role="button" aria-label="راهنمای خروجی">؟<span class="tip-body"><b>۱۶:۹</b> برای یوتیوب و پخش افقی؛ <b>۹:۱۶</b> برای ریلز و شورتس. زیرنویس کلمه‌به‌کلمه خودکار می‌سوزه و داخل حاشیه‌ی امن پلتفرم قفل می‌شه.</span></span>
+    </h3>
         <div class="cards two" id="ratioCards"></div>
         <p class="note" id="ratioNote" hidden>حالت تیزر: زیرنویس کلمه‌به‌کلمه خودکار روی فیلم می‌سوزد و همهٔ متن‌ها داخل حاشیهٔ امن پلتفرم قفل می‌شوند — روی ۹:۱۶ دور از نوار اکشن و کپشنِ ریلز اینستاگرام.</p>
         <div class="fields row">
@@ -110,7 +116,9 @@
 
       <!-- گام ۴: شروع -->
       <div class="wstep" data-wstep="4">
-        <h3>مرور و اجرا</h3>
+        <h3>یه نگاه بنداز، بزن بریم
+      <span class="tip" tabindex="0" role="button" aria-label="راهنمای شروع">؟<span class="tip-body">جهت‌دهی اختیاریه — اگه چیزی خاص تو ذهنیه (مثلاً «روی فلان عدد تاکید کنه») همین‌جا بنویس؛ مثل سند جدی گرفته می‌شه. بعد از شروع، پیشرفت رو همین‌جا زنده می‌بینی.</span></span>
+    </h3>
         <div class="fields">
           <label>نام جاب <input id="jobName" type="text" placeholder="بی‌نام می‌ماند اگر خالی بگذاری"></label>
           <label>جهت‌دهی (اختیاری — این متن را مثل سند می‌خوانیم)
@@ -119,7 +127,7 @@
         </div>
         <div class="summary" id="startSummary"></div>
         <div class="actions">
-          <button class="primary big" id="startBtn">شروع جاب</button>
+          <button class="primary big" id="startBtn">بزن بریم 🚀</button>
         </div>
         <div id="queueInfo" hidden></div>
       </div>
@@ -129,7 +137,7 @@
   <div class="bar">
     <button class="ghost" id="backBtn" disabled>قبلی</button>
     <small class="bar-hint" id="stepHint">گام ۱ از ۴ — ایجنت</small>
-    <button class="primary" id="nextBtn">بعدی</button>
+    <button class="primary" id="nextBtn">بریم بعدی</button>
   </div>
 </section>
 
@@ -166,7 +174,7 @@
     <!-- دروازهٔ ۱: ویرایش ترنسکریپت -->
     <div class="panel gate" id="gate-transcript" hidden>
       <h3>بازبینی ترنسکریپت <small class="gate-tag">دروازهٔ ۱</small></h3>
-      <p class="hint">هر خط را می‌توانی ویرایش کنی — غلط املایی و اشتباه whisper را همین‌جا بگیر. وقت هر خط را که کلیک کنی ویدیو همان‌جا می‌پرد.</p>
+      <p class="hint">متن گفتار آماده‌ست 👌 روی <b>ساعت هر خط</b> کلیک کنی ویدیو همون‌جا می‌پره؛ هر جا غلط بود رو دستی درست کن، بعد «تایید و ادامه».</p>
       <div class="tr-tools">
         <video id="trVideo" controls muted></video>
       </div>
@@ -186,7 +194,7 @@
     <!-- دروازهٔ ۲: دمو + چت‌باکس -->
     <div class="panel gate" id="gate-preview" hidden>
       <h3>دموی اولیه <small class="gate-tag">دروازهٔ ۲</small></h3>
-      <p class="hint">کم‌حجم و سریع است — فقط برای قضاوت دربارهٔ ادیت. هر تغییری را در چت‌باکس بگو؛ اعمال می‌شود و دموی تازه می‌آید. تا تایید نکنی، خروجی نهایی ساخته نمی‌شود.</p>
+      <p class="hint">این دموی کم‌حجمه — فقط برای این که ادیت رو قضاوت کنی. هر تغییری رو تو چت‌باکس خودمونی بگو (مثلاً: «تراکم بیشتر» یا «خط ۳: …»)؛ اعمال می‌کنم و دموی تازه میاد. تا تایید تو، هیچ خروجی نهایی‌ای ساخته نمی‌شه.</p>
       <div class="preview-grid">
         <video id="pvVideo" controls playsinline></video>
         <div class="chat">
@@ -203,7 +211,7 @@
 
     <!-- خروجی نهایی -->
     <div class="panel" id="resultPanel" hidden>
-      <h3>خروجی نهایی</h3>
+      <h3>خروجی نهایی 🎬</h3>
       <video id="resVideo" controls playsinline></video>
       <div class="meta" id="resMeta"></div>
       <div class="actions">
@@ -227,14 +235,14 @@
 <!-- ═══════════════ ۳. جاب‌ها ═══════════════ -->
 <section id="jobs-view" class="view">
   <h2>جاب‌ها</h2>
-  <div id="jobList" class="job-list"></div>
+  <div id="jobList" class="job-list"><p class="hint" data-empty-jobs>هنوز جابی نیست — اولین ویدیوت رو بنداز تا ببینیم چی ازش درمیاد 🎬</p></div>
 </section>
 
 <!-- ═══════════════ ۴. رفرنس‌ها (حافظه) ═══════════════ -->
 <section id="references-view" class="view">
   <h2>رفرنس‌های یادگرفته‌شده</h2>
   <p class="lead">هر ویدیوی رفرنس یک بار تحلیل می‌شود و پروفایلش برای همیشه می‌ماند — جاب بعدی با همان سبک بی‌درنگ شروع می‌شود.</p>
-  <div id="refList" class="ref-grid"></div>
+  <div id="refList" class="ref-grid"><p class="hint" data-empty-refs>حافظه‌ی رفرنس خالیه — با اولین جاب پر می‌شه و دیگه یادش نمی‌ره 🧠</p></div>
 </section>
 
 <!-- ═══════════════ ۵. تنظیمات ═══════════════ -->
@@ -243,7 +251,7 @@
   <div class="cards two">
     <div class="panel">
       <h3>توان سیستم</h3>
-      <p class="hint">قانون خانه ۵۰٪ است — رندرها هرگز بیشتر از این مقدار CPU نمی‌گیرند.</p>
+      <p class="hint">قانون خانه ۵۰٪ یعنی رندر فقط نصف CPU رو می‌گیره — سیستم گرم نمی‌شه و تو هم‌زمان کارت رو می‌کنی. هر جا خواستی عوضش کن.</p>
       <label class="slider-row"><input type="range" id="cpuSlider" min="10" max="100" step="5" value="50"><b id="cpuPct">۵۰٪</b></label>
       <div class="kv" id="cpuDetail"></div>
       <button class="primary" id="cpuSave">ذخیرهٔ توان</button>

@@ -1391,3 +1391,24 @@ pre.wake { background: var(--well); border: 1px solid var(--hairline); border-ra
 .about-bio .en-bio { direction: ltr; text-align: left; color: var(--faint); }
 .about-bio b { color: var(--ink); }
 @media (max-width: 720px) { .about-grid { grid-template-columns: 1fr; } }
+
+/* ── guided hints: the friendly teacher in every stage ── */
+.tip {
+  position: relative; display: inline-grid; place-items: center; width: 21px; height: 21px;
+  border-radius: 50%; border: 1px solid var(--accent-line); color: var(--accent); background: var(--accent-dim);
+  font-size: 11px; font-weight: 800; cursor: help; user-select: none; flex: none; vertical-align: middle;
+}
+.tip .tip-body {
+  position: absolute; bottom: calc(100% + 10px); inset-inline-start: 50%; width: max-content; max-width: 280px;
+  background: var(--well); color: var(--muted); border: 1px solid var(--accent-line); border-radius: 12px;
+  padding: 12px 14px; font-size: 12.5px; font-weight: 400; line-height: 2; text-align: start; white-space: normal;
+  opacity: 0; pointer-events: none; transition: opacity var(--dur) var(--ease); box-shadow: var(--el-3); z-index: 80;
+}
+[dir="rtl"] .tip .tip-body { transform: translateX(50%); }
+[dir="ltr"] .tip .tip-body { transform: translateX(-50%); }
+.tip:hover .tip-body, .tip:focus .tip-body, .tip:focus-within .tip-body { opacity: 1; }
+.tip:focus { outline: none; box-shadow: var(--ring); }
+.tip .tip-body b { color: var(--accent); font-weight: 700; }
+h3 .tip, .panel h3 .tip { margin-inline-start: 8px; top: -2px; }
+.step-tip { color: var(--faint); font-size: 12.5px; margin: 6px 0 var(--s3); line-height: 2; }
+.step-tip b { color: var(--accent); font-weight: 600; }

@@ -147,7 +147,7 @@ function buildMenu() {
     {
       label: 'استودیو ویدیو',
       submenu: [
-        { role: 'about', label: 'دربارهٔ استودیو ویدیو' },
+        { role: 'about', label: 'دربارهٔ استودیوی ادیت ویدیو با هوش مصنوعی' },
         { type: 'separator' },
         {
           label: 'بررسی به‌روزرسانی…',
@@ -184,7 +184,7 @@ function createWindow(port) {
     minWidth: 980,
     minHeight: 640,
     backgroundColor: '#101111',
-    title: 'استودیو ویدیو — Video Studio',
+    title: 'استودیوی ادیت ویدیو با هوش مصنوعی — Video Studio',
     autoHideMenuBar: process.platform !== 'darwin',
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
@@ -216,11 +216,11 @@ if (!gotLock) {
     });
     ipcMain.on('update:install', () => { if (!isDev) autoUpdater.quitAndInstall(); });
     app.setAboutPanelOptions({
-      applicationName: 'استودیو ویدیو — Video Studio',
+      applicationName: 'استودیوی ادیت ویدیو با هوش مصنوعی — AI Video Editing Studio',
       applicationVersion: app.getVersion(),
       version: 'engine 2.0.0 · HyperFrames',
       credits:
-        'ساختهٔ پدرام قلی‌زاده — طراح و توسعه‌دهنده.\nBuilt by Pedram Gholizadeh — design & development.\n\nدو فایل بگیر، یک تدوین تحویل بده.\nTwo files in, one edit out.',
+        'استودیوی ادیت ویدیو با هوش مصنوعی\nAI Video Editing Studio\n\nساختهٔ پدرام قلی‌زاده — طراح و توسعه‌دهنده.\nBuilt by Pedram Gholizadeh — design & development.\n\nدو فایل بده، یه تدوین بگیر.\nTwo files in, one edit out.',
       authors: ['Pedram Gholizadeh'],
       website: 'https://github.com/pedramgholizadeh/ai-agentic-video-studio',
     });

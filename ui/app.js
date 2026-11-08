@@ -475,7 +475,7 @@
     // class names follow the stylesheet (.status.succeeded / .status.queued / …)
     const cls = { running: 'running', review: 'queued', queued: 'queued', succeeded: 'succeeded', failed: 'failed', cancelled: 'failed', draft: 'queued' }[j.status] || 'queued';
     el.className = `status ${cls}`;
-    const labels = { running: 'در حال ساخت', review: 'منتظر بازبینی تو', queued: 'در صف ایجنت', succeeded: 'آماده', failed: 'خطا', cancelled: 'لغو شد', draft: 'ساخته نشده' };
+    const labels = { running: 'در حال ساخته شدن', review: 'منتظر تایید تویه', queued: 'در صف ایجنت', succeeded: 'آماده', failed: 'خطا', cancelled: 'لغو شد', draft: 'ساخته نشده' };
     el.innerHTML = `<i></i>${labels[j.status] || j.status}`;
     if (j.status === 'failed' && j.error) el.title = j.error;
   }
@@ -613,7 +613,7 @@
             (m) => `
         <div class="chat-msg ${esc(m.role)}">${esc(m.text)}<small>${esc((m.ts || '').slice(11, 16))}</small></div>`,
           )
-          .join('') || '<p class="hint">هنوز پیامی نیست — ادیتت را بنویس.</p>';
+          .join('') || '<p class="hint">هنوز پیامی نیست — ادیتت رو خودمونی بنویس؛ مثلاً: تراکم بیشتر 👌</p>';
       $('#chatLog').scrollTop = 1e6;
     } catch {
       /* fresh job */
@@ -750,7 +750,7 @@
     $('#jobList').innerHTML =
       jobs
         .map((j) => {
-          const labels = { running: 'در حال ساخت', review: 'منتظر بازبینی', queued: 'در صف', succeeded: 'آماده', failed: 'خطا', cancelled: 'لغو', draft: 'پیش‌نویس' };
+          const labels = { running: 'در حال ساخته شدن', review: 'منتظر تایید تویه', queued: 'در صف', succeeded: 'آماده', failed: 'خطا', cancelled: 'لغو', draft: 'پیش‌نویس' };
           return `
         <div class="job-row" data-id="${esc(j.id)}">
           <span class="name">${esc(j.config?.name || j.id)}</span>
@@ -758,7 +758,7 @@
           <span class="pct">${fa(j.progress?.pct ?? 0)}٪</span>
         </div>`;
         })
-        .join('') || '<p class="hint">هنوز جابی نیست.</p>';
+        .join('') || '<p class="hint">هنوز جابی نیست — اولین ویدیوت رو بنداز تا ببینیم چی ازش درمیاد 🎬</p>';
     $$('#jobList .job-row').forEach((r) => r.addEventListener('click', () => openJob(r.dataset.id, { switch: true })));
   }
 
@@ -785,7 +785,7 @@
         </div>
       </div>`,
         )
-        .join('') || '<p class="hint">هنوز رفرنسی تحلیل نشده — اولین جاب، اولین حافظه می‌سازد.</p>';
+        .join('') || '<p class="hint">حافظه‌ی رفرنس خالیه — با اولین جاب پر می‌شه و دیگه یادش نمی‌ره 🧠</p>';
     $$('#refList .use-ref').forEach((b) =>
       b.addEventListener('click', async () => {
         const p = b.dataset.p;

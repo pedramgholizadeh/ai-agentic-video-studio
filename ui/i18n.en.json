@@ -389,5 +389,19 @@
  "whisper آفلاین با مدل بزرگ، سپس دروازهٔ بازبینی: هر خط قابل ویرایش، کلیک روی زمان": "Offline whisper with the big model, then a review gate: every line editable, click a time",
  "دو فایل بده — ویدیوی خودت و یک رفرنس — یک تدوین بگیر. اپلیکیشن دسکتاپ استودیو ویدیو برای macOS و Windows. Two files in, one edit out — the Video Studio desktop app.": "Two files in — your video and a reference — one edit out. The Video Studio desktop app for macOS and Windows.",
  "ویدیوی رفرنس. سبک رفرنس پیکسل‌پرفکت تحلیل می‌شود — ریتم، ترنزیشن، پالت — و روی فیلم تو پیاده می‌شود.": "a reference video. The reference's style — rhythm, transitions, palette — is applied to your footage.",
- "More info → Run anyway رد کن. رندرها با قانون خانه روی ۵۰٪ توان CPU قفل‌اند — از تنظیمات عوضش کن.": "More info → Run anyway. Renders stay locked at the house 50% CPU rule — change it in settings."
+ "More info → Run anyway رد کن. رندرها با قانون خانه روی ۵۰٪ توان CPU قفل‌اند — از تنظیمات عوضش کن.": "More info → Run anyway. Renders stay locked at the house 50% CPU rule — change it in settings.",
+ "استودیوی ادیت ویدیو با هوش مصنوعی": "AI Video Editing Studio",
+ "آماده‌سازی و سنجش ویدیو": "probe & prepare the video",
+ "پیاده‌سازی گفتار به متن (whisper)": "speech-to-text (whisper)",
+ "بازبینی و ویرایش ترنسکریپت": "review & edit the transcript",
+ "درک محتوا و نوشتن بریف": "understand & write the brief",
+ "تحلیل پیکسل‌پرفکت رفرنس": "pixel-perfect reference analysis",
+ "جمع‌آوری اسِت‌ها (لوگو، افکت، فونت)": "gather assets (logo, SFX, fonts)",
+ "چینش صحنه و لایهٔ موشن": "stage the scene & motion layer",
+ "دموی اولیهٔ کم‌حجم": "the cheap first demo",
+ "رندر و کامپوزیت نهایی": "final render & composite",
+ "راستی‌آزمایی خروجی": "verify the output",
+ "سناریو و استراتژی تدوین (کارت)": "Scenario & edit strategy",
+ "یوتیوب / پخش": "YouTube / playback",
+ "ریلز / شورتس": "Reels / Shorts"
 }
