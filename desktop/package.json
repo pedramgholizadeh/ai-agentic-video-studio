@@ -89,5 +89,10 @@
       "repo": "ai-agentic-video-studio",
       "releaseType": "release"
     }
+  },
+  "allowScripts": {
+    "ffmpeg-static@5.2.0": true,
+    "ffprobe-static@3.1.0": true,
+    "electron@33.2.0": true
   }
 }

@@ -90,11 +90,15 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if [[ "$GITHUB_REF" == refs/tags/* ]]; then
-            npx electron-builder ${{ matrix.targets }} --publish always
-          else
-            npx electron-builder ${{ matrix.targets }} --publish never
-          fi
+          set -o pipefail
+          if [[ "$GITHUB_REF" == refs/tags/* ]]; then PUB=always; else PUB=never; fi
+          npx electron-builder ${{ matrix.targets }} --publish "$PUB" 2>&1 | tee build.log
+
+      - name: Surface build errors
+        if: failure()
+        working-directory: desktop
+        shell: bash
+        run: grep -aiE "⨯|error|fail|cannot|exit code" build.log | tail -12 | while IFS= read -r line; do echo "::error::${line:0:200}"; done
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
