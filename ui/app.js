@@ -257,9 +257,11 @@
 
   async function paintWhisperSelect() {
     try {
-      S.whisper = await api('/api/whisper');
-      $('#whisperModel').innerHTML = S.whisper.models
-        .map((m) => `<option value="${m.id}" ${S.whisper.default === m.id ? 'selected' : ''}>${m.id}${m.present ? '' : ' — دانلود نشده'}</option>`)
+      const d = S.models || (await api('/api/models'));
+      S.models = d;
+      const stt = d.catalog.filter((m) => m.category === 'stt' && !m.enOnly);
+      $('#whisperModel').innerHTML = stt
+        .map((m) => `<option value="${m.id}" ${d.defaultStt === m.id ? 'selected' : ''}>${m.id}${m.present ? '' : ' — دانلود نشده (تنظیمات)'}</option>`)
         .join('');
     } catch {
       $('#whisperModel').innerHTML = '<option>large-v3</option>';
