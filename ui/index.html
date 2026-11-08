@@ -257,23 +257,21 @@
       <button class="primary" id="cpuSave">ذخیرهٔ توان</button>
     </div>
     <div class="panel">
-      <h3>ترنسکریپت</h3>
-      <p class="hint">مدل بزرگ دقیق‌تر است؛ دیفالت large-v3.</p>
-      <div class="kv" id="whisperBox"></div>
-    </div>
-    <div class="panel">
-      <h3>برند استودیو</h3>
-      <p class="hint">توکن‌های پایه — جاب‌ها از رفرنس بازنویسی‌اش می‌کنند.</p>
-      <div class="fields">
-        <label>اکسنت <input type="text" id="brandAccent" placeholder="#55e6a5"></label>
-        <label>پیش‌فرض نسبت <input type="text" id="brandNote" readonly></label>
-      </div>
-      <button class="ghost" id="brandSave">ذخیرهٔ برند</button>
-    </div>
-    <div class="panel">
       <h3>سرویس‌های API</h3>
       <div id="providerSettings"></div>
     </div>
+  </div>
+
+  <div class="panel" id="modelStore">
+    <h3>فروشگاه مدل‌ها
+      <span class="tip" tabindex="0" role="button" aria-label="راهنمای مدل‌ها">؟<span class="tip-body">هر مدلی که دانلود کنی <b>روی همین سیستم</b> می‌مونه و می‌تونی هر وقت خواستی حذفش کنی تا فضا آزاد شه. مدل گفتار‌به‌متن برای ترنسکریپت جاب‌ها استفاده می‌شه؛ مدل‌های صدا (TTS) برای قابلیت گوینده‌ی فارسی که به‌زودی اضافه می‌شه. هیچ مدل به‌صورت خودکار دانلود نمی‌شه — فقط اونایی که خودت می‌خوای.</span></span>
+    </h3>
+    <div class="chips" id="modelTabs">
+      <button class="chip on" data-cat="stt">گفتار به متن (whisper)</button>
+      <button class="chip" data-cat="tts">صداسازی فارسی (TTS)</button>
+    </div>
+    <div id="modelList" class="model-list"></div>
+    <p class="hint" id="modelDirHint"></p>
   </div>
 
   <div class="panel about" id="aboutCard">

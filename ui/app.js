@@ -805,76 +805,129 @@
     );
   }
 
-  /** The transcription card: default-model radio + in-place downloads. */
-  async function paintWhisperSettings() {
+  /* ------- the model store: categories, download, delete, default ------- */
+
+  let modelCat = 'stt';
+  let modelPolling = false;
+
+  async function paintModels() {
     try {
-      S.whisper = await api('/api/whisper');
-      $('#whisperBox').innerHTML = S.whisper.models
-        .map(
-          (m) => `
-        <div class="wmodel-row">
-          <label class="slider-row"><input type="radio" name="wmodel" value="${m.id}" ${S.whisper.default === m.id ? 'checked' : ''}>
-            <span>${m.id} ${m.present ? `<small>${esc(mb(m.size))}</small>` : '<small class="miss">— دانلود نشده</small>'}</span></label>
-          ${m.present ? '' : `<button class="ghost tiny wdl" data-m="${m.id}" ${S.whisper.downloading?.includes(m.id) ? 'disabled' : ''}>${S.whisper.downloading?.includes(m.id) ? 'در حال دانلود…' : 'دانلود'}</button>`}
-        </div>`,
-        )
-        .join('');
-      $$('#whisperBox input').forEach((r) =>
-        r.addEventListener('change', async () => {
-          S.cfg = await api('/api/config', { method: 'POST', body: { transcribe: { model: r.value } } });
-          toast(`مدل پیش‌فرض ${r.value} شد`);
-        }),
-      );
-      $$('#whisperBox .wdl').forEach((b) =>
+      S.models = await api('/api/models');
+      const list = S.models.catalog.filter((m) => m.category === modelCat);
+      $('#modelList').innerHTML =
+        list
+          .map((m) => {
+            const dl = S.models.downloading?.includes(m.id);
+            const prog = S.models.progress?.[m.id];
+            const status = m.present
+              ? '<span class="chip">روی سیستمه ✓</span>'
+              : dl
+                ? `<span class="chip">در حال دانلود ${prog ? '· ' + fa(prog.pct) + '٪' : ''}</span>`
+                : '<span class="chip">دانلود نشده</span>';
+            return `
+      <div class="model-row ${m.default ? 'is-default' : ''}">
+        <div class="m-head">
+          <b>${esc(m.id)}${m.default ? ' <span class="m-default">پیش‌فرض</span>' : ''}</b>
+          <span class="m-meta">${esc(mb(m.bytes))}${m.enOnly ? ' · فقط انگلیسی' : ''}</span>
+        </div>
+        <p class="m-fa">${esc(m.fa)}</p>
+        ${dl && prog ? `<div class="progress-track slim"><div class="progress-fill" style="width:${prog.pct}%"></div></div>` : ''}
+        <div class="m-actions">
+          ${m.kind === 'whisper' ? `<button class="ghost tiny m-def" data-id="${esc(m.id)}" ${m.present && !m.default ? '' : 'disabled'}>${m.default ? 'پیش‌فرض ✓' : 'بزرگش کن پیش‌فرض'}</button>` : ''}
+          ${m.present ? `<button class="ghost tiny m-del" data-id="${esc(m.id)}">حذف و آزادسازی</button>` : ''}
+          <button class="primary tiny m-dl" data-id="${esc(m.id)}" ${dl || m.present ? 'disabled' : ''}>${dl ? 'در حال دانلود…' : m.present ? 'نصب است ✓' : 'دانلود'}</button>
+        </div>
+      </div>`;
+          })
+          .join('') || '<p class="hint">—</p>';
+      $('#modelDirHint').textContent = `محل ذخیره: ${(modelCat === 'stt' ? S.models.dirs.stt : S.models.dirs.tts).replace(/^\/Users\/[^/]+/, '~')}`;
+      $$('#modelList .m-dl').forEach((b) =>
         b.addEventListener('click', async () => {
-          const m = b.dataset.m;
+          const id = b.dataset.id;
           b.disabled = true;
-          b.textContent = 'در حال دانلود…';
+          b.textContent = 'شروع…';
           try {
-            await api('/api/whisper/download', { method: 'POST', body: { model: m } });
-            toast(`دانلود ${m} شروع شد — تا تمام شدن همین‌جا می‌ماند`);
-            pollWhisper();
+            await api('/api/models/download', { method: 'POST', body: { id } });
+            toast(`دانلود ${id} شروع شد — تا تمام شدن همین‌جا می‌مونه`);
+            pollModels();
           } catch (err) {
             toast(err.message, 'bad');
-            b.disabled = false;
-            b.textContent = 'دانلود';
+            paintModels();
           }
         }),
       );
+      $$('#modelList .m-del').forEach((b) =>
+        b.addEventListener('click', async () => {
+          const id = b.dataset.id;
+          if (!confirm(`«${id}» حذف بشه تا فضا آزاد بشه؟ بعداً دوباره می‌تونی دانلودش کنی.`)) return;
+          try {
+            await api('/api/models/delete', { method: 'POST', body: { id } });
+            toast(`${id} حذف شد — فضا آزاد شد`);
+            paintModels();
+          } catch (err) {
+            toast(err.message, 'bad');
+          }
+        }),
+      );
+      $$('#modelList .m-def').forEach((b) =>
+        b.addEventListener('click', async () => {
+          S.cfg = await api('/api/config', { method: 'POST', body: { transcribe: { model: b.dataset.id } } });
+          toast(`${b.dataset.id} پیش‌فرض ترنسکریپت شد ✓`);
+          paintModels();
+        }),
+      );
     } catch {
-      $('#whisperBox').innerHTML = '<p class="hint">—</p>';
+      $('#modelList').innerHTML = '<p class="hint">—</p>';
     }
   }
 
-  /** While a model download is live, refresh its card until it lands. */
-  let whisperPolling = false;
-  async function pollWhisper() {
-    if (whisperPolling) return;
-    whisperPolling = true;
-    let wasDownloading = true;
-    while (wasDownloading) {
-      await new Promise((r) => setTimeout(r, 4000));
+  async function pollModels() {
+    if (modelPolling) return;
+    modelPolling = true;
+    while (true) {
+      await new Promise((r) => setTimeout(r, 2000));
       try {
-        const w = await api('/api/whisper');
-        S.whisper = w;
-        wasDownloading = (w.downloading || []).length > 0;
-        if (S.view === 'settings') await paintWhisperSettings();
+        const d = await api('/api/models');
+        S.models = d;
+        if (S.view === 'settings') await paintModels();
+        if (!(d.downloading || []).length) break;
       } catch {
         break;
       }
     }
-    whisperPolling = false;
+    modelPolling = false;
     toast('دانلود مدل تمام شد ✓');
+  }
+
+  async function paintCpuDetail(pct) {
+    try {
+      const pf = await api(`/api/preflight?cpu=${pct}`);
+      $('#cpuDetail').innerHTML = `
+        <div class="row"><b>رشته‌های مجاز</b><span>${fa(pf.threads)}</span></div>
+        <div class="row"><b>ورکرهای رندر</b><span>${fa(pf.workers)}</span></div>
+        <div class="row"><b>قانون خانه</b><span>${pf.pct <= 50 ? 'رعایت می‌شود ✓' : 'بالاتر از ۵۰٪ — دستگاه گرم‌تر می‌شود'}</span></div>
+        ${pf.warnings.map((w) => `<div class="row"><b>هشدار</b><span>${esc(w)}</span></div>`).join('')}`;
+    } catch {
+      /* engine off */
+    }
   }
 
   async function loadSettings() {
     S.cfg = await api('/api/config');
+    $$('#modelTabs .chip').forEach((c) =>
+      c.addEventListener('click', () => {
+        modelCat = c.dataset.cat;
+        $$('#modelTabs .chip').forEach((x) => x.classList.toggle('on', x === c));
+        paintModels();
+      }),
+    );
+
     const pct = S.cfg.cpu?.pct ?? 50;
     $('#cpuSlider').value = pct;
     $('#cpuPct').textContent = `${fa(pct)}٪`;
     await paintCpuDetail(pct);
-    // whisper models — pick the default, download the missing ones in place
-    await paintWhisperSettings();
+    // the model store
+    await paintModels();
     // brand
     try {
       const brand = await api('/api/brand');

@@ -15,6 +15,7 @@ import { spawn } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 
 import { UPLOADS_DIR, REFERENCES_ROOT, STUDIO_ROOT } from './lib/paths.mjs';
+import * as models from './lib/models.mjs';
 import { readConfig, writeConfig, publicConfig, DEFAULTS } from './lib/config.mjs';
 import { powerBudget, preflight } from './lib/cool.mjs';
 import { RATIOS } from './lib/ratios.mjs';
@@ -32,8 +33,6 @@ import { corsHeaders, parseAllowed, isSelf, isMutating, hasMarker } from './lib/
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const UI = path.join(here, 'ui');
-/** Whisper models currently being fetched (in-memory; a restart clears it). */
-const modelDownloads = new Set();
 const PORT = Number(process.env.PORT) || readConfig().port || 8790;
 const originArg = process.argv.find((a) => a.startsWith('--allow-origin'));
 const allowed = parseAllowed(
@@ -297,36 +296,26 @@ async function api(req, res, url) {
     return streamFile(req, res, file);
   }
 
-  // -- whisper models ---------------------------------------------------------
-  if (url.pathname === '/api/whisper') {
-    const cache = process.env.HYPERFRAMES_CACHE_DIR || path.join(os.homedir(), '.cache', 'hyperframes');
-    const dir = path.join(cache, 'whisper', 'models');
-    const models = ['small', 'medium', 'large-v3', 'large-v3-turbo'].map((m) => {
-      const file = path.join(dir, `ggml-${m}.bin`);
-      return { id: m, present: fs.existsSync(file), size: fs.existsSync(file) ? fs.statSync(file).size : null };
-    });
-    return json(res, 200, { dir, models, default: readConfig().transcribe?.model || 'large-v3', downloading: [...modelDownloads] });
+  // -- the model store --------------------------------------------------------
+  if (url.pathname === '/api/models' && req.method === 'GET') {
+    return json(res, 200, { ...models.listModels(), progress: models.downloadProgress() });
   }
 
-  if (url.pathname === '/api/whisper/download' && req.method === 'POST') {
-    // fetch the pinned offline model on demand — one download at a time,
-    // checksum-verified by scripts/fetch-models.mjs itself
-    const { model } = await readJson(req);
-    const known = ['tiny', 'base', 'small', 'medium', 'large-v1', 'large-v2', 'large-v3', 'large-v3-turbo'];
-    if (!known.includes(model)) return fail(res, 400, `مدل ناشناخته: ${model}`);
-    if (modelDownloads.has(model)) return json(res, 200, { started: false, reason: 'already downloading', model });
-    const cache = process.env.HYPERFRAMES_CACHE_DIR || path.join(os.homedir(), '.cache', 'hyperframes');
-    if (fs.existsSync(path.join(cache, 'whisper', 'models', `ggml-${model}.bin`)))
-      return json(res, 200, { started: false, reason: 'already present', model });
-    modelDownloads.add(model);
-    const logFile = path.join(UPLOADS_DIR, '..', 'whisper-download.log');
-    const child = spawn(process.execPath, [path.join(here, 'scripts', 'fetch-models.mjs'), '--model', model], {
-      detached: true,
-      stdio: ['ignore', fs.openSync(logFile, 'a'), fs.openSync(logFile, 'a')],
-    });
-    child.on('close', () => modelDownloads.delete(model));
-    child.unref();
-    return json(res, 200, { started: true, model, log: logFile });
+  if (url.pathname === '/api/models/download' && req.method === 'POST') {
+    const { id } = await readJson(req);
+    const r = models.startDownload(id);
+    if (!r.started) return json(res, 200, { ...r, id });
+    return json(res, 200, { started: true, id, ...r });
+  }
+
+  if (url.pathname === '/api/models/delete' && req.method === 'POST') {
+    const { id } = await readJson(req);
+    const r = models.deleteModel(id);
+    if (!r.deleted) {
+      const why = { 'unknown-model': 'مدل ناشناخته است', downloading: 'دانلودش تمام نشده — اول صبر کن', 'is-default': 'این مدل پیش‌فرض ترنسکریپت است — اول پیش‌فرض را عوض کن' }[r.reason] || r.reason;
+      return fail(res, 409, why);
+    }
+    return json(res, 200, { deleted: id });
   }
 
   if (url.pathname === '/api/sfx') {

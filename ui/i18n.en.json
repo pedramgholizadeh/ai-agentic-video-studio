@@ -403,5 +403,22 @@
  "راستی‌آزمایی خروجی": "verify the output",
  "سناریو و استراتژی تدوین (کارت)": "Scenario & edit strategy",
  "یوتیوب / پخش": "YouTube / playback",
- "ریلز / شورتس": "Reels / Shorts"
+ "ریلز / شورتس": "Reels / Shorts",
+ "فروشگاه مدل‌ها": "Model store",
+ "گفتار به متن (whisper)": "Speech-to-text (whisper)",
+ "صداسازی فارسی (TTS)": "Persian TTS",
+ "روی سیستمه ✓": "on this machine ✓",
+ "دانلود نشده": "not downloaded",
+ "پیش‌فرض": "default",
+ "پیش‌فرض ✓": "default ✓",
+ "بزرگش کن پیش‌فرض": "make default",
+ "حذف و آزادسازی": "delete & free space",
+ "نصب است ✓": "installed ✓",
+ "شروع…": "starting…",
+ "دانلودش تمام نشده — اول صبر کن": "its download is not finished — wait first",
+ "این مدل پیش‌فرض ترنسکریپت است — اول پیش‌فرض را عوض کن": "this is the transcription default — change the default first",
+ "مدل ناشناخته است": "unknown model",
+ "پیش‌فرض ترنسکریپت شد ✓": "is now the transcription default ✓",
+ "حذف شد — فضا آزاد شد": "deleted — space freed",
+ "فقط انگلیسی": "English-only"
 }
