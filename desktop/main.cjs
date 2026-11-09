@@ -13,12 +13,17 @@
  * Everything that arrives on first use (HyperFrames, its Chrome, the whisper
  * runtime, models) downloads into the user's cache — the panel shows progress.
  */
+const DBG = (t) => { try { require('node:fs').appendFileSync('/tmp/vs-boot-debug.log', t + '\n'); } catch {} };
+DBG('M0 top');
 const { app, BrowserWindow, Menu, dialog, shell, nativeTheme, ipcMain } = require('electron');
+DBG('M1 electron required');
 const { spawn } = require('node:child_process');
 const fs = require('node:fs');
 const http = require('node:http');
 const path = require('node:path');
+DBG('M2 before updater');
 const { autoUpdater } = require('electron-updater');
+DBG('M3 updater required');
 
 const isDev = !app.isPackaged;
 const resources = isDev ? __dirname : process.resourcesPath;
@@ -32,6 +37,14 @@ const LOG_FILE = path.join(LOG_DIR, 'server.log');
  * a packaged app's Resources directory can be read-only (App Translocation)
  * and is wiped by every update. */
 const USER_WORKSPACE = path.join(app.getPath('userData'), 'workspace');
+
+/** boot.log — one line per milestone, so a stalled boot tells us where. */
+function bootLog(line) {
+  try {
+    fs.mkdirSync(LOG_DIR, { recursive: true });
+    fs.appendFileSync(path.join(LOG_DIR, 'boot.log'), `${new Date().toISOString()} ${line}\n`, 'utf8');
+  } catch {}
+}
 
 /** Read the tail of the server log so an error dialog can show real evidence. */
 function serverLogTail(chars = 1200) {
@@ -60,21 +73,26 @@ async function pickPort() {
 function waitHealthy(port, tries = 120) {
   const url = `http://127.0.0.1:${port}/api/config`;
   return new Promise((resolve, reject) => {
-    const attempt = (n) => {
+    let left = tries;
+    const schedule = () => {
+      if (left-- <= 0) return reject(new Error('server never became healthy'));
+      setTimeout(attempt, 500);
+    };
+    const attempt = () => {
       const req = http.get(url, (res) => {
         res.resume();
-        res.statusCode === 200 ? resolve() : retry(n);
+        res.statusCode === 200 ? resolve() : schedule();
       });
-      req.on('error', () => retry(n));
-      const retry = (n) => (n > 0 ? setTimeout(() => attempt(n - 1), 500) : reject(new Error('server never became healthy')));
-      attempt(tries);
+      req.on('error', schedule);
     };
-    attempt(tries);
+    attempt();
   });
 }
 
 let server = null;
 let mainWindow = null;
+let serverAttempts = 0;
+let port0 = null;
 
 /** Kill the server AND its whole process tree — renders and ffmpeg children
  * must never outlive the app. POSIX: a detached process group; Windows: taskkill /T. */
@@ -92,6 +110,7 @@ function killServer() {
 }
 
 function startServer(port) {
+  serverAttempts++;
   fs.mkdirSync(LOG_DIR, { recursive: true });
   const log = fs.openSync(LOG_FILE, 'a');
   fs.writeSync(log, `\n=== ${new Date().toISOString()} — studio boot (app ${app.getVersion()}) ===\n`);
@@ -111,7 +130,14 @@ function startServer(port) {
     stdio: ['ignore', log, log],
   });
   server.on('exit', (code) => {
+    const wasUnexpected = !app.isQuitting;
     server = null;
+    // a silent early death gets one automatic respawn before we bother the user
+    if (wasUnexpected && serverAttempts <= 2 && code !== 0) {
+      bootLog(`server exited early (code ${code}) — respawn ${serverAttempts}`);
+      setTimeout(() => { try { startServer(port0); } catch (err) { bootLog(`respawn failed: ${err.message}`); } }, 2000);
+      return;
+    }
     if (!app.isQuitting && mainWindow && !mainWindow.isDestroyed()) {
       dialog.showMessageBox(mainWindow, {
         type: 'error',
@@ -225,6 +251,7 @@ function createWindow(port) {
   mainWindow.loadURL(`http://127.0.0.1:${port}/`);
 }
 
+DBG('M4 before lock');
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) {
   app.quit();
@@ -234,6 +261,8 @@ if (!gotLock) {
   });
 
   app.whenReady().then(async () => {
+    DBG('M5 ready');
+    bootLog('electron ready');
     // the panel's update button works everywhere; the updater itself only in packaged builds
     ipcMain.handle('update:check', async () => {
       if (isDev) throw new Error('در حالت توسعه، به‌روزرسان غیرفعال است — بیلد منتشرشده را امتحان کن.');
@@ -252,12 +281,21 @@ if (!gotLock) {
     });
     buildMenu();
     try {
+      DBG('M6 port picking');
       const port = await pickPort();
+      DBG('M7 port picked: ' + port);
+      bootLog(`port ${port} picked`);
       startServer(port);
+      DBG('M8 server spawned');
+      bootLog('server spawned');
       await waitHealthy(port);
+      DBG('M9 healthy');
+      bootLog('engine healthy');
       createWindow(port);
+      bootLog('window created');
       if (!isDev) wireUpdater();
     } catch (err) {
+      bootLog(`BOOT FAILED: ${String(err.stack || err.message || err).slice(0, 1500)}`);
       // the dialog must carry the real evidence: the stack plus the server's own log
       dialog.showMessageBox({
         type: 'error',
