@@ -559,9 +559,11 @@ async function api(req, res, url) {
   return fail(res, 404, `unknown api: ${url.pathname}`);
 }
 
-function deepMergeConfig(a, b) {
+function deepMergeConfig(a, b, depth = 0) {
+  // a runaway or cyclic payload can never blow the stack
+  if (depth > 12) return a;
   for (const [k, v] of Object.entries(b || {})) {
-    if (v && typeof v === 'object' && !Array.isArray(v)) a[k] = deepMergeConfig(a[k] || {}, v);
+    if (v && typeof v === 'object' && !Array.isArray(v)) a[k] = deepMergeConfig(a[k] || {}, v, depth + 1);
     else if (v !== undefined) a[k] = v;
   }
   return a;

@@ -28,6 +28,20 @@ const NODE_DIR = path.join(resources, 'node');
 const NODE_BIN_DIR = path.join(NODE_DIR, process.platform === 'win32' ? '' : 'bin');
 const LOG_DIR = isDev ? path.join(STUDIO_DIR, 'workspace', '.studio') : path.join(app.getPath('userData'), 'logs');
 const LOG_FILE = path.join(LOG_DIR, 'server.log');
+/* All user data (jobs, renders, models, config) lives OUTSIDE the app bundle:
+ * a packaged app's Resources directory can be read-only (App Translocation)
+ * and is wiped by every update. */
+const USER_WORKSPACE = path.join(app.getPath('userData'), 'workspace');
+
+/** Read the tail of the server log so an error dialog can show real evidence. */
+function serverLogTail(chars = 1200) {
+  try {
+    const s = fs.readFileSync(LOG_FILE, 'utf8');
+    return s.length > chars ? '…' + s.slice(-chars) : s;
+  } catch {
+    return '(لاگ هنوز نوشته نشده)';
+  }
+}
 
 /** A free loopback port, preferring the studio's own 8790. */
 async function pickPort() {
@@ -90,6 +104,8 @@ function startServer(port) {
       ELECTRON_RUN_AS_NODE: '1',
       PORT: String(port),
       VIDEO_STUDIO_APP_VERSION: app.getVersion(),
+      // user data out of the app bundle: writable, survives updates
+      VIDEO_STUDIO_HOME: USER_WORKSPACE,
       PATH: [BIN_DIR, NODE_BIN_DIR, NODE_DIR, process.env.PATH].filter(Boolean).join(path.delimiter),
     },
     stdio: ['ignore', log, log],
@@ -196,6 +212,16 @@ function createWindow(port) {
     shell.openExternal(url); // external links open in the real browser
     return { action: 'deny' };
   });
+  // a crashed renderer should never strand the user on a white screen
+  mainWindow.webContents.on('render-process-gone', () => {
+    dialog.showMessageBox({
+      type: 'error',
+      title: 'پنل ری‌استارت می‌شود',
+      message: 'نمایشگر پنل خطا داد — دوباره بارگذاری می‌شود.',
+      buttons: ['باشه'],
+    }).catch(() => {});
+    if (mainWindow && !mainWindow.isDestroyed()) mainWindow.reload();
+  });
   mainWindow.loadURL(`http://127.0.0.1:${port}/`);
 }
 
@@ -232,11 +258,14 @@ if (!gotLock) {
       createWindow(port);
       if (!isDev) wireUpdater();
     } catch (err) {
+      // the dialog must carry the real evidence: the stack plus the server's own log
       dialog.showMessageBox({
         type: 'error',
         title: 'موتور استودیو بالا نیامد',
         message: 'موتور استودیو شروع نشد.',
-        detail: `${String(err.message || err)}\n\nلاگ کامل:\n${LOG_FILE}`,
+        detail:
+          `${String(err.message || err)}\n\n— stack —\n${String(err.stack || '').slice(0, 1400)}` +
+          `\n\n— server log (tail) —\n${serverLogTail(800)}\n\n— فایل لاگ:\n${LOG_FILE}`,
         buttons: ['بستن'],
       });
       app.quit();
