@@ -23,10 +23,13 @@ const http = require('node:http');
 const path = require('node:path');
 DBG('M2 before updater');
 const { autoUpdater } = require('electron-updater');
+const { pathToFileURL } = require('node:url');
 DBG('M3 updater required');
 
-const isDev = !app.isPackaged;
-const resources = isDev ? __dirname : process.resourcesPath;
+/* isPackaged lies in a hand-assembled bundle (the executable is still named
+ * Electron), so "dev" is detected by the engine's own presence instead. */
+const isDev = !fs.existsSync(path.resolve(__dirname, '..', 'studio', 'server.mjs'));
+const resources = isDev ? path.resolve(__dirname, '..') : path.dirname(__dirname);
 const STUDIO_DIR = isDev ? path.resolve(__dirname, '..') : path.join(resources, 'studio');
 const BIN_DIR = path.join(resources, 'bin');
 const NODE_DIR = path.join(resources, 'node');
@@ -89,66 +92,31 @@ function waitHealthy(port, tries = 120) {
   });
 }
 
-let server = null;
 let mainWindow = null;
-let serverAttempts = 0;
-let port0 = null;
 
 /** Kill the server AND its whole process tree — renders and ffmpeg children
  * must never outlive the app. POSIX: a detached process group; Windows: taskkill /T. */
 function killServer() {
-  if (!server) return;
-  try {
-    if (process.platform === 'win32') {
-      spawn('taskkill', ['/pid', String(server.pid), '/T', '/F'], { stdio: 'ignore' });
-    } else {
-      try { process.kill(-server.pid, 'SIGTERM'); } catch { server.kill('SIGTERM'); }
-      setTimeout(() => { try { process.kill(-server.pid, 'SIGKILL'); } catch {} }, 1500);
-    }
-  } catch {}
+  try { globalThis.__studioCancelAll?.(); } catch {}
   server = null;
 }
 
-function startServer(port) {
-  serverAttempts++;
-  fs.mkdirSync(LOG_DIR, { recursive: true });
-  const log = fs.openSync(LOG_FILE, 'a');
-  fs.writeSync(log, `\n=== ${new Date().toISOString()} — studio boot (app ${app.getVersion()}) ===\n`);
-  // the Electron binary runs plain-Node when ELECTRON_RUN_AS_NODE is set —
-  // the studio needs nothing but itself
-  server = spawn(process.execPath, [path.join(STUDIO_DIR, 'server.mjs')], {
-    detached: process.platform !== 'win32', // its own process group, so the tree dies with the app
-    env: {
-      ...process.env,
-      ELECTRON_RUN_AS_NODE: '1',
-      PORT: String(port),
-      VIDEO_STUDIO_APP_VERSION: app.getVersion(),
-      // user data out of the app bundle: writable, survives updates
-      VIDEO_STUDIO_HOME: USER_WORKSPACE,
-      PATH: [BIN_DIR, NODE_BIN_DIR, NODE_DIR, process.env.PATH].filter(Boolean).join(path.delimiter),
-    },
-    stdio: ['ignore', log, log],
-  });
-  server.on('exit', (code) => {
-    const wasUnexpected = !app.isQuitting;
-    server = null;
-    // a silent early death gets one automatic respawn before we bother the user
-    if (wasUnexpected && serverAttempts <= 2 && code !== 0) {
-      bootLog(`server exited early (code ${code}) — respawn ${serverAttempts}`);
-      setTimeout(() => { try { startServer(port0); } catch (err) { bootLog(`respawn failed: ${err.message}`); } }, 2000);
-      return;
-    }
-    if (!app.isQuitting && mainWindow && !mainWindow.isDestroyed()) {
-      dialog.showMessageBox(mainWindow, {
-        type: 'error',
-        title: 'موتور استودیو خاموش شد',
-        message: 'موتور استودیو به‌طور غیرمنتظره بسته شد.',
-        detail: `کد خروج: ${code ?? '—'}\nلاگ کامل:\n${LOG_FILE}`,
-        buttons: ['راه‌اندازی دوباره', 'بستن'],
-        defaultId: 0,
-      }).then(({ response }) => (response === 0 ? relaunch() : app.quit()));
-    }
-  });
+/** The engine runs IN this process: one require, no child, no env juggling.
+ * Renders still run as their own children and are killed on quit. */
+async function startEngine(port) {
+  process.env.PORT = String(port);
+  process.env.VIDEO_STUDIO_APP_VERSION = app.getVersion();
+  process.env.VIDEO_STUDIO_HOME = USER_WORKSPACE;
+  const url = pathToFileURL(path.join(STUDIO_DIR, 'server.mjs')).href;
+  DBG('M8.5 importing engine: ' + url);
+  try {
+    await import(url);
+    DBG('M8.6 engine imported');
+    bootLog(`engine started in-process on ${port}`);
+  } catch (err) {
+    DBG('ENGINE IMPORT FAILED: ' + String(err.stack || err).slice(0, 1200));
+    throw err;
+  }
 }
 
 function relaunch() {
@@ -285,9 +253,7 @@ if (!gotLock) {
       const port = await pickPort();
       DBG('M7 port picked: ' + port);
       bootLog(`port ${port} picked`);
-      startServer(port);
-      DBG('M8 server spawned');
-      bootLog('server spawned');
+      await startEngine(port);
       await waitHealthy(port);
       DBG('M9 healthy');
       bootLog('engine healthy');
@@ -316,6 +282,6 @@ if (!gotLock) {
   });
   app.on('before-quit', () => {
     app.isQuitting = true;
-    if (server) { try { server.kill(); } catch {} }
+    killServer();
   });
 }
